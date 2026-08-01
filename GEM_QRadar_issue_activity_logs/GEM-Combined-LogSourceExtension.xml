@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:device-extension xmlns:ns2="event_parsing/device_extension">
+    <pattern id="Issue-EventName-Pattern" type="JsonKeypath">/"issue_name"</pattern>
+    <pattern id="Issue-EventCategory-Pattern" type="JsonKeypath">/"issue_type"</pattern>
+    <pattern id="Issue-UserName-Pattern" type="JsonKeypath">/"issue_executor"</pattern>
+    <pattern id="Issue-DeviceAddress-Pattern" type="JsonKeypath">/"asset_id"</pattern>
+    <pattern id="AllIssueEvents" type="JavaPattern">(.*?)</pattern>
+    <pattern id="Activity-EventName-Pattern" type="JsonKeypath">/"4"</pattern>
+    <pattern id="Activity-UserName-Pattern" type="JsonKeypath">/"2"</pattern>
+    <pattern id="Activity-StartTime-Pattern" type="JsonKeypath">/"1"</pattern>
+    <pattern id="AllActivityEvents" type="JavaPattern">(.*?)</pattern>
+    <match-group order="1" device-type-id-override="4015">
+        <json-matcher field="EventName" pattern-id="Issue-EventName-Pattern" enable-substitutions="true" order="1"/>
+        <json-matcher field="EventCategory" pattern-id="Issue-EventCategory-Pattern" enable-substitutions="true" order="1"/>
+        <json-matcher field="UserName" pattern-id="Issue-UserName-Pattern" enable-substitutions="true" order="1"/>
+        <json-matcher field="DeviceAddress" pattern-id="Issue-DeviceAddress-Pattern" enable-substitutions="true" order="1"/>
+        <event-match-multiple pattern-id="AllIssueEvents" send-identity="UseDSMResults" force-qidmap-lookup-on-fixup="true"/>
+    </match-group>
+    <match-group order="2" device-type-id-override="4015">
+        <json-matcher field="EventName" pattern-id="Activity-EventName-Pattern" enable-substitutions="true" order="1"/>
+        <json-matcher field="UserName" pattern-id="Activity-UserName-Pattern" enable-substitutions="true" order="1"/>
+        <json-matcher field="StartTime" pattern-id="Activity-StartTime-Pattern" enable-substitutions="true" order="1"/>
+        <event-match-multiple pattern-id="AllActivityEvents" send-identity="UseDSMResults" force-qidmap-lookup-on-fixup="true"/>
+    </match-group>
+</ns2:device-extension>

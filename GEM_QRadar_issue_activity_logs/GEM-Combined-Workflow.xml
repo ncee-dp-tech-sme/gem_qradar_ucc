@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  QRadar Universal Cloud REST API Connector
+  Connector : Guardium Exposure Manager (GEM) - Open Issues + Activity Log (Combined)
+  Version   : 1.0
+  Date      : 2026-08-02
+
+  Change log:
+  - 2026-08-02 v1.0: Combined Open Issues + Details and Activity Log into a single
+                     workflow and log source. Reduces QRadar log source overhead and
+                     keeps all GEM events under one source identity. Issues use a
+                     daily midnight-to-midnight window; Activity Log uses a rolling
+                     window of recurrence_minutes. Both sections share gem_host,
+                     api_key, and api_secret parameters.
+
+  Parameters
+
+  gem_host            : Hostname of the GEM instance only, no scheme, no trailing slash.
+                        e.g. eu.guardium.security.ibm.com
+  api_key             : GEM API key
+  api_secret          : GEM API secret
+  report_id           : Activity Log report ID (default: 000000000000000000002001)
+  fetch_size          : Records per page for the Activity Log endpoint (default: 500)
+  recurrence_minutes  : Must match the log source recurrence schedule in QRadar (default: 10)
+-->
+<Workflow name="GEM_Combined" version="1.0"
+          xmlns="http://qradar.ibm.com/UniversalCloudRESTAPI/Workflow/V2">
+
+    <Parameters>
+        <!-- Hostname of the GEM instance only — no scheme, no trailing slash -->
+        <Parameter name="gem_host"            label="GEM Host (hostname only)"          required="true" />
+        <!-- GEM API key -->
+        <Parameter name="api_key"             label="API Key"                            required="true" secret="true" />
+        <!-- GEM API secret -->
+        <Parameter name="api_secret"          label="API Secret"                         required="true" secret="true" />
+        <!-- Activity Log report ID (default: 000000000000000000002001) -->
+        <Parameter name="report_id"           label="Activity Log Report ID"             required="true" />
+        <!-- Records per page for the Activity Log (default: 500) -->
+        <Parameter name="fetch_size"          label="Fetch Size (Activity Log)"          required="true" />
+        <!-- Must match the log source recurrence schedule in QRadar (minutes, default: 10) -->
+        <Parameter name="recurrence_minutes"  label="Recurrence Interval (minutes)"      required="true" />
+    </Parameters>
+
+    <Actions>
+
+        <!-- ════════════════════════════════════════════════════════════════════
+             SHARED SETUP
+             ════════════════════════════════════════════════════════════════════ -->
+
+        <!-- Build Basic auth credential string used by both sections -->
+        <Set path="/gem/credentials" value="${/api_key}:${/api_secret}" />
+
+        <ClearStatus />
+        <SetStatus type="INFO" message="GEM Combined connector started." />
+
+
+        <!-- ════════════════════════════════════════════════════════════════════
+             SECTION A — OPEN ISSUES
+             Fetches all issues detected in the previous calendar day
+             (yesterday midnight → today midnight UTC).
+             ════════════════════════════════════════════════════════════════════ -->
+
+        <!-- ── A1: compute UTC midnight boundaries ──────────────────────────── -->
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss" timeZone="UTC" time="${time()}" savePath="/gem/today_formatted" />
+        <RegexCapture pattern="^(\d{4}-\d{2}-\d{2})" value="${/gem/today_formatted}" savePath="/gem/today_date" />
+        <Set path="/gem/today_midnight_str" value="${/gem/today_date}T00:00:00" />
+        <ParseDate pattern="yyyy-MM-dd'T'HH:mm:ss" timeZone="UTC" date="${/gem/today_midnight_str}" savePath="/gem/today_midnight_ms" />
+        <Set path="/gem/yesterday_midnight_ms" value="${/gem/today_midnight_ms - 86400000}" />
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss'Z'" timeZone="UTC"
+                    time="${/gem/yesterday_midnight_ms}" savePath="/gem/issues_date_from" />
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss'Z'" timeZone="UTC"
+                    time="${/gem/today_midnight_ms}" savePath="/gem/issues_date_to" />
+
+        <!-- ── A2: build date-filter JSON ───────────────────────────────────── -->
+        <!--
+          Plain JSON passed as a QueryParameter — the UCC framework handles URL-encoding.
+          Manual percent-encoding causes double-encoding and HTTP 500 from the GEM API.
+        -->
+        <Set path="/gem/date_filter"
+             value="{&quot;preset&quot;:&quot;custom&quot;,&quot;from&quot;:&quot;${/gem/issues_date_from}&quot;,&quot;to&quot;:&quot;${/gem/issues_date_to}&quot;}" />
+
+        <!-- ── A3: initialise issues pagination ─────────────────────────────── -->
+        <Set path="/gem/issues_limit"  value="20" />
+        <Set path="/gem/issues_offset" value="0"  />
+
+        <SetStatus type="INFO"
+                   message="GEM Issues: fetching open issues from ${/gem/issues_date_from} to ${/gem/issues_date_to}." />
+
+        <!-- ── A4: paginated issues retrieval loop ───────────────────────────── -->
+        <DoWhile condition="${count(/gem/issues_response/body/issues)} = ${/gem/issues_limit}">
+
+            <CallEndpoint url="https://${/gem_host}/api/v1/issues" method="GET"
+                          savePath="/gem/issues_response">
+                <QueryParameter name="offset"                value="${/gem/issues_offset}" />
+                <QueryParameter name="limit"                 value="${/gem/issues_limit}" />
+                <QueryParameter name="filters.status[]"      value="ISSUE_STATUS_OPEN" />
+                <QueryParameter name="filters.date_detected" value="${/gem/date_filter}" />
+                <RequestHeader  name="authorization"  value="Basic ${base64_encode(/gem/credentials)}" />
+                <RequestHeader  name="Accept"         value="application/json" />
+                <RequestHeader  name="Content-Type"   value="application/json" />
+            </CallEndpoint>
+
+            <If condition="${/gem/issues_response/status_code} != 200">
+                <Log type="ERROR"
+                     message="GEM Issues API error: ${/gem/issues_response/status_code}: ${/gem/issues_response/status_message}" />
+                <Abort reason="${/gem/issues_response/status_code}: ${/gem/issues_response/status_message}" />
+            </If>
+
+            <If condition="${count(/gem/issues_response/body/issues)} > 0">
+                <Log type="INFO"
+                     message="GEM Issues: fetching details for ${count(/gem/issues_response/body/issues)} issues at offset ${/gem/issues_offset}." />
+
+                <ForEach items="/gem/issues_response/body/issues" item="/gem/issue">
+
+                    <CallEndpoint url="https://${/gem_host}/api/v1/issues/${/gem/issue/single/issue_id}/details"
+                                  method="GET" savePath="/gem/detail_response">
+                        <RequestHeader name="authorization" value="Basic ${base64_encode(/gem/credentials)}" />
+                        <RequestHeader name="Accept"        value="application/json" />
+                    </CallEndpoint>
+
+                    <If condition="${/gem/detail_response/status_code} != 200">
+                        <Log type="ERROR"
+                             message="GEM Issues: failed to fetch details for issue ${/gem/issue/single/issue_id}: ${/gem/detail_response/status_code}: ${/gem/detail_response/status_message}" />
+                    </If>
+                    <Else>
+                        <!-- Post the issue_details/single object as a QRadar event.
+                             The LSX discriminates this as an issue event via the
+                             presence of the issue_id field. -->
+                        <PostEvent path="/gem/detail_response/body/issue_details/single" source="${/gem_host}" />
+                    </Else>
+
+                </ForEach>
+            </If>
+
+            <Set path="/gem/issues_offset" value="${/gem/issues_offset + /gem/issues_limit}" />
+
+        </DoWhile>
+
+        <Log type="INFO"
+             message="GEM Issues section completed. Final offset: ${/gem/issues_offset}." />
+
+
+        <!-- ════════════════════════════════════════════════════════════════════
+             SECTION B — ACTIVITY LOG
+             Fetches activity log entries within the rolling window
+             [now - recurrence_minutes, now].
+             ════════════════════════════════════════════════════════════════════ -->
+
+        <!-- ── B1: compute rolling date window ──────────────────────────────── -->
+        <Set path="/gem/interval_ms"       value="${/recurrence_minutes * 60000}" />
+        <Set path="/gem/to_epoch_ms"       value="${time()}" />
+        <Set path="/gem/from_epoch_ms"     value="${/gem/to_epoch_ms - /gem/interval_ms}" />
+
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timeZone="UTC"
+                    time="${/gem/from_epoch_ms}" savePath="/gem/activity_date_from" />
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timeZone="UTC"
+                    time="${/gem/to_epoch_ms}" savePath="/gem/activity_date_to" />
+
+        <!-- ── B2: initialise activity log pagination ───────────────────────── -->
+        <Set path="/gem/activity_offset" value="0" />
+
+        <SetStatus type="INFO"
+                   message="GEM Activity Log: fetching records from ${/gem/activity_date_from} to ${/gem/activity_date_to}." />
+
+        <!-- ── B3: paginated activity log retrieval loop ────────────────────── -->
+        <!--
+          POST /api/v3/reports/run with runtime date parameters.
+          Loop exits when a partial page (count < fetch_size) is returned.
+        -->
+        <DoWhile condition="${count(/gem/activity_response/body/result/data)} = ${/fetch_size}">
+
+            <CallEndpoint url="https://${/gem_host}/api/v3/reports/run" method="POST"
+                          savePath="/gem/activity_response">
+                <RequestHeader name="authorization" value="Basic ${base64_encode(/gem/credentials)}" />
+                <RequestHeader name="Accept"        value="application/json" />
+                <RequestHeader name="Content-Type"  value="application/json" />
+                <RequestBody type="JSON" encoding="UTF-8">
+                    {
+                        "fetch_size": ${/fetch_size},
+                        "offset": ${/gem/activity_offset},
+                        "report_id": "${/report_id}",
+                        "runtime_parameter_list": [
+                            {
+                                "key": "QUERY_FROM_DATE",
+                                "runtime_parameter_type": "DATE",
+                                "value": "${/gem/activity_date_from}"
+                            },
+                            {
+                                "key": "QUERY_TO_DATE",
+                                "runtime_parameter_type": "DATE",
+                                "value": "${/gem/activity_date_to}"
+                            }
+                        ],
+                        "without_limit": true
+                    }
+                </RequestBody>
+            </CallEndpoint>
+
+            <If condition="${/gem/activity_response/status_code} != 200">
+                <Log type="ERROR"
+                     message="GEM Activity Log API error: ${/gem/activity_response/status_code}: ${/gem/activity_response/status_message}" />
+                <Abort reason="${/gem/activity_response/status_code}: ${/gem/activity_response/status_message}" />
+            </If>
+
+            <If condition="${count(/gem/activity_response/body/result/data)} > 0">
+                <Log type="INFO"
+                     message="GEM Activity Log: processing ${count(/gem/activity_response/body/result/data)} records at offset ${/gem/activity_offset}." />
+
+                <ForEach items="/gem/activity_response/body/result/data" item="/gem/activity">
+                    <!-- Post the results object. The LSX discriminates this as an activity
+                         event via the presence of numeric string keys ("1", "2", ...). -->
+                    <PostEvent path="/gem/activity/results" source="${/gem_host}" />
+                </ForEach>
+            </If>
+
+            <Set path="/gem/activity_offset" value="${/gem/activity_offset + /fetch_size}" />
+
+        </DoWhile>
+
+        <Log type="INFO"
+             message="GEM Activity Log section completed. Final offset: ${/gem/activity_offset}." />
+
+
+        <!-- ── Final status ──────────────────────────────────────────────────── -->
+        <SetStatus type="INFO" message="GEM Combined connector completed successfully." />
+
+    </Actions>
+
+    <!-- ── Connectivity pre-flight checks ──────────────────────────────────── -->
+    <Tests>
+        <DNSResolutionTest              host="${/gem_host}" />
+        <TCPConnectionTest              host="${/gem_host}" />
+        <SSLHandshakeTest               host="${/gem_host}" />
+        <HTTPConnectionThroughProxyTest url="https://${/gem_host}" />
+    </Tests>
+
+</Workflow>

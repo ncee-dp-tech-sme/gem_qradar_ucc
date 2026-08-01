@@ -1,0 +1,827 @@
+{
+    "result": {
+        "data": [
+            {
+                "results": {
+                    "1": "2026-08-01 16:08:02.924104",
+                    "2": "Erwin Friethoff",
+                    "3": "API Keys",
+                    "4": "Create",
+                    "5": "API Key for Qradar UCC EHF",
+                    "6": "Succeeded",
+                    "7": "APIKEY_H2IVTEGWOWDBGSEITNXJTT"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:55:05.389947",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:52:47.407982",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:40:05.856484",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:39:19.294409",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|dfd84668-97be-4895-bc3e-ce4bb8c08fb6]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:39:19.112574",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|ef46e91b-7afc-4d57-9b53-d74aa714d68a]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:39:15.682765",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:39:10.257914",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|fd7ff7c4-9b34-4171-bda2-18eddb33706a]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:39:10.239602",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|918760a4-fb7e-4e03-99dc-44c345c23ddf]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:39:06.577079",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:38:56.55236",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:37:19.091994",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:36:53.163648",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|87f37232-d4e6-448d-9836-e40d89eef0e4]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:36:52.664211",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|eee34c46-42a3-44d8-9b03-83b924758723]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:36:50.045592",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:35:38.663211",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|d39086c9-58e4-444a-a328-5857134b6ee8]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:35:38.65953",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|39e76329-f0c7-49e3-b8dc-8383f0ca2ebc]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:35:35.166314",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:32:46.373202",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:32:38.3582",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|2aec77e5-47e0-44a5-8362-7d7e646fd4f3]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:32:38.339653",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|8760ae85-2fdd-47e1-bced-4a4c79b7b41b]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:32:34.435182",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:32:26.018386",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:29:34.945127",
+                    "2": "DEVAN SHAH",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:26:37.227967",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_DH6EQZHVCWRQGEUKWDQDXD",
+                    "6": "Succeeded",
+                    "7": "usr_DH6EQZHVCWRQGEUKWDQDXD"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:26:24.003731",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_T8FG4HN47RK2Q7EFZAGX3X",
+                    "6": "Succeeded",
+                    "7": "usr_T8FG4HN47RK2Q7EFZAGX3X"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:26:20.969045",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_DLNYLGQB8EQMRA5WKEQSVH",
+                    "6": "Succeeded",
+                    "7": "usr_DLNYLGQB8EQMRA5WKEQSVH"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:26:17.534064",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_H26JFXZBVZWFEOKGQRZJAN",
+                    "6": "Succeeded",
+                    "7": "usr_H26JFXZBVZWFEOKGQRZJAN"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:26:14.949132",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_GFOATIBRH4JN7GESIMZY76",
+                    "6": "Succeeded",
+                    "7": "usr_GFOATIBRH4JN7GESIMZY76"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:26:11.141721",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_YEWPEVMEDD4ERFCJQLYJN6",
+                    "6": "Succeeded",
+                    "7": "usr_YEWPEVMEDD4ERFCJQLYJN6"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:26:02.05595",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_VJJQSXMR4QUJED5H5IEV9T",
+                    "6": "Succeeded",
+                    "7": "usr_VJJQSXMR4QUJED5H5IEV9T"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:25:58.894263",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_GKHR6QC8WZFGQMK59HK2PZ",
+                    "6": "Succeeded",
+                    "7": "usr_GKHR6QC8WZFGQMK59HK2PZ"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:25:53.174905",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_9MRJ7CJQFZPDGRV2WNFLSM",
+                    "6": "Succeeded",
+                    "7": "usr_9MRJ7CJQFZPDGRV2WNFLSM"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:25:50.388705",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_KGKFUP2TZMGRQ82QTFXAS",
+                    "6": "Succeeded",
+                    "7": "usr_KGKFUP2TZMGRQ82QTFXAS"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:25:41.483312",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_JYQFMZ3XAMVWC5DKL8ADEY",
+                    "6": "Succeeded",
+                    "7": "usr_JYQFMZ3XAMVWC5DKL8ADEY"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:25:37.896439",
+                    "2": "DEVAN SHAH",
+                    "3": "User Management",
+                    "4": "DeleteUser",
+                    "5": "usr_SCPWPDM77UO6FRWYMACWO6",
+                    "6": "Succeeded",
+                    "7": "usr_SCPWPDM77UO6FRWYMACWO6"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:56.671633",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|7af66412-63e2-4b15-9cb7-95441f26cd54]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:56.142028",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|3773eb8a-80e6-48f8-a360-80211bbb3f62]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:52.052603",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:43.339003",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|3a64e605-92a8-44ae-a75e-23d5c3c0b3e3]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:42.861376",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|341e2de2-77b3-45a3-879d-85961a929fea]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:38.92676",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:26.763419",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|01b5a2b6-797d-4fe2-bbc8-4f465807b63f]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:26.269815",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|eeafc54a-3c62-4c45-a801-fe8b2af31c44]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:22.751497",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:06.905201",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|c0a8c6ca-c138-4f4d-a28f-b720fd6646db]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:06.620755",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|a45c95d9-e8ca-44f1-b836-da015372e654]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:02.557353",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:01.464352",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|76fcccd1-a546-4351-9ece-aebb13581a48]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:05:00.97314",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|e6b9eaf3-c974-4527-8525-b5fba5dc90a3]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:04:57.51011",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Endpoint activities",
+                    "6": "Succeeded",
+                    "7": "000000000000000000000086"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:04:46.508527",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Endpoint activities",
+                    "6": "Succeeded",
+                    "7": "000000000000000000000086"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:04:38.540834",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|993180f4-e376-4139-b02d-c0f8060b2f99]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:04:38.044221",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|3b07cf9b-4b0d-4452-aad4-85d41a523f09]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:04:34.029588",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Audit results log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000001301"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 15:04:27.899314",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Audit results log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000001301"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 11:32:56.656905",
+                    "2": "Trey Donohue",
+                    "3": "Workbench Api",
+                    "4": "Get issue graph data",
+                    "5": "getIssueGraph",
+                    "6": "Retrieve the complete graph structure including pipelines, nodes, and edges for specific issues. Customer ID is extracted from JWT token.",
+                    "7": "16"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 11:31:35.923098",
+                    "2": "a a",
+                    "3": "User Management",
+                    "4": "UpdateUser",
+                    "5": "name: Trey Donohue externalid: 646009CZKC state: ACTIVE email: treydonohue@us.ibm.com roles: gem-admin,gem-user ",
+                    "6": "Succeeded",
+                    "7": "usr_AEERCDMYOE3HM6Q2ZX8KX"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 11:31:35.855802",
+                    "2": "Trey Donohue",
+                    "3": "User Management",
+                    "4": "Login",
+                    "5": "treydonohue@us.ibm.com",
+                    "6": "Succeeded",
+                    "7": "usr_AEERCDMYOE3HM6Q2ZX8KX"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 11:04:18.429443",
+                    "2": "PIOTR BISKUPSKI",
+                    "3": "User Management",
+                    "4": "Login",
+                    "5": "piotr.biskupski@pl.ibm.com",
+                    "6": "Succeeded",
+                    "7": "usr_PDPAAJBVEHEW5NL2XYXBJQ"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 11:04:18.333816",
+                    "2": "a a",
+                    "3": "User Management",
+                    "4": "UpdateUser",
+                    "5": "name: PIOTR BISKUPSKI externalid: 64300373RC state: ACTIVE email: piotr.biskupski@pl.ibm.com roles: gem-admin,gem-user ",
+                    "6": "Succeeded",
+                    "7": "usr_PDPAAJBVEHEW5NL2XYXBJQ"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 07:24:45.649415",
+                    "2": "a a",
+                    "3": "User Management",
+                    "4": "UpdateUser",
+                    "5": "name: BALRAJ BOPARAI externalid: 64500922ME state: ACTIVE email: bbalraj@in.ibm.com roles: gem-admin,gem-user ",
+                    "6": "Succeeded",
+                    "7": "usr_FR6VK2KQ37UGLHYS4UMOVI"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 07:24:45.51172",
+                    "2": "BALRAJ BOPARAI",
+                    "3": "User Management",
+                    "4": "Login",
+                    "5": "bbalraj@in.ibm.com",
+                    "6": "Succeeded",
+                    "7": "usr_FR6VK2KQ37UGLHYS4UMOVI"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 02:56:24.901937",
+                    "2": "a a",
+                    "3": "User Management",
+                    "4": "UpdateUser",
+                    "5": "name: ‪Ofir Yehuda‬‏ uid: Ofir.Yehuda2@ibm.com externalid: 645006B3TK state: ACTIVE email: Ofir.Yehuda2@ibm.com roles: gem-admin,gem-user ",
+                    "6": "Succeeded",
+                    "7": "usr_MASHNMWWPNUV3QSWKMVQ94"
+                }
+            }
+        ],
+        "final_result": true,
+        "report_layout": {
+            "is_predefined": true,
+            "report_description": "A log of all activities within Guardium",
+            "report_headers": [
+                {
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_CREATIONTIMEUTC",
+                        "nls_value": "Date created (local time)"
+                    },
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_CREATIONTIMEUTC_DESCRIPTION",
+                        "nls_value": "Date and time the activity was created"
+                    },
+                    "header_id": "2007",
+                    "header_name": "CreationTimeUTC",
+                    "sequence": 1
+                },
+                {
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_PERFORMED_BY",
+                        "nls_value": "Performed by"
+                    },
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_PERFORMED_BY_DESCRIPTION",
+                        "nls_value": "The user who performs the activity"
+                    },
+                    "header_id": "2001",
+                    "header_name": "PerformedBy",
+                    "sequence": 2
+                },
+                {
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT",
+                        "nls_value": "Context"
+                    },
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT_COLUMN_DESCRIPTION",
+                        "nls_value": "The service context of the activity"
+                    },
+                    "header_id": "2002",
+                    "header_name": "Context",
+                    "sequence": 3
+                },
+                {
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_ACTION_TAKEN",
+                        "nls_value": "Action taken"
+                    },
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_ACTION_TAKEN_DESCRIPTION",
+                        "nls_value": "The action taken by the activity"
+                    },
+                    "header_id": "2003",
+                    "header_name": "ActionTaken",
+                    "sequence": 4
+                },
+                {
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT_DESCRIPTION",
+                        "nls_value": "Context description"
+                    },
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT_DESCRIPTION_DESCRIPTION",
+                        "nls_value": "The detailed context description of the activity"
+                    },
+                    "header_id": "2004",
+                    "header_name": "ContextDescription",
+                    "sequence": 5
+                },
+                {
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_ACTIVITY",
+                        "nls_value": "Activity"
+                    },
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_ACTIVITY_DESCRIPTION",
+                        "nls_value": "The detailed context of the activity"
+                    },
+                    "header_id": "2005",
+                    "header_name": "Activity",
+                    "sequence": 6
+                },
+                {
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_AUDIT_TRAIL_ID",
+                        "nls_value": "Audit trail ID"
+                    },
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_AUDIT_TRAIL_ID_DESCRIPTION",
+                        "nls_value": "The audited trail id of the activity"
+                    },
+                    "header_id": "2006",
+                    "header_name": "AuditTrailID",
+                    "sequence": 7
+                }
+            ],
+            "report_id": "000000000000000000002001",
+            "report_name": "Activity log",
+            "runtime_param_list": [
+                {
+                    "key": "QUERY_FROM_DATE",
+                    "label": "Time From",
+                    "operator_type": "GREATER_THAN_OR_EQUAL",
+                    "runtime_parameter_type": "DATE_UTC",
+                    "runtime_parameter_type_length": 10
+                },
+                {
+                    "key": "QUERY_TO_DATE",
+                    "label": "Time To",
+                    "operator_type": "LESS_THAN",
+                    "runtime_parameter_type": "DATE_UTC",
+                    "runtime_parameter_type_length": 10
+                }
+            ]
+        },
+        "total_number_of_rows": 64
+    }
+}
