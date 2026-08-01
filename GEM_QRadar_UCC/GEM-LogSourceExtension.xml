@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ============================================================
+  QRadar Log Source Extension (LSX)
+  Product : Guardium Exposure Manager (GEM)
+  Version : 1.0
+  Date    : 2026-08-01
+
+  Purpose
+  -------
+  Parses JSON events posted by the GEM Universal Cloud REST API
+  Workflow and maps every field from issue_detail.json to QRadar
+  event properties and Custom Event Properties (CEPs).
+
+  The workflow posts the inner "issue_details/single" object, so
+  each event root is the issue detail record:
+    { "issue_id": "16", "sequential_id": "ISS-0016", ... }
+
+  Schema
+  ------
+  Namespace : event_parsing/device_extension
+  Pattern types:
+    JsonKeypath  – extracts a JSON field using /"key" syntax
+    JavaPattern  – Java regex; (.*?) used as catch-all for
+                   event-match-multiple
+
+  device-type-id-override
+  -----------------------
+  4026 = Universal Cloud REST API log source type in QRadar.
+  This binds the extension to events collected by the GEM UCC
+  workflow log source.
+
+  Standard QRadar fields mapped
+  ------------------------------
+  EventName     ← issue_name   (shown in Log Activity "Event Name")
+  EventCategory ← issue_type   (drives high/low category lookup)
+  UserName      ← issue_executor
+  DeviceAddress ← asset_id     (source identifier for the event)
+
+  Custom Event Properties (CEPs)
+  --------------------------------
+  CEPs are created via Admin → Custom Event Properties → Add,
+  or by right-clicking an event in Log Activity → Extract Property.
+  The field names used in the json-matcher elements below must
+  match the CEP names exactly once created.
+
+  Property name                   JSON source field
+  ----------------------------    -------------------------------------------------
+  GEM Issue ID                    issue_id
+  GEM Sequential ID               sequential_id
+  GEM Issue Name                  issue_name
+  GEM Issue Type                  issue_type
+  GEM Issue Executor              issue_executor
+  GEM Issue Status                issue_status
+  GEM Asset Name                  asset_name
+  GEM Asset ID                    asset_id
+  GEM Asset Type                  asset_type
+  GEM Affected Resources Count    affected_resources_count
+  GEM Policy ID                   policy_id
+  GEM Policy Name                 policy_name
+  GEM Date Detected               date_detected
+  GEM Last Modified               last_modified
+  GEM Scope                       scope
+  GEM Scope ID                    scope_id
+  GEM Rule ID                     rule_id
+  GEM Data Classifications        data_classifications
+  GEM Sensitivity Category        resource_classification_counts[0].sensitivity_tag_category
+  GEM Sensitivity Count           resource_classification_counts[0].count
+  ============================================================
+-->
+<ns2:device-extension xmlns:ns2="event_parsing/device_extension">
+
+    <!-- ── JsonKeypath patterns ───────────────────────────────────────────── -->
+    <!-- Standard QRadar event fields -->
+    <pattern id="EventName-Pattern"      type="JsonKeypath">/"issue_name"</pattern>
+    <pattern id="EventCategory-Pattern"  type="JsonKeypath">/"issue_type"</pattern>
+    <pattern id="UserName-Pattern"       type="JsonKeypath">/"issue_executor"</pattern>
+    <pattern id="DeviceAddress-Pattern"  type="JsonKeypath">/"asset_id"</pattern>
+
+    <!-- Custom Event Property patterns — flat fields -->
+    <pattern id="GEM-IssueId-Pattern"               type="JsonKeypath">/"issue_id"</pattern>
+    <pattern id="GEM-SequentialId-Pattern"          type="JsonKeypath">/"sequential_id"</pattern>
+    <pattern id="GEM-IssueName-Pattern"             type="JsonKeypath">/"issue_name"</pattern>
+    <pattern id="GEM-IssueType-Pattern"             type="JsonKeypath">/"issue_type"</pattern>
+    <pattern id="GEM-IssueExecutor-Pattern"         type="JsonKeypath">/"issue_executor"</pattern>
+    <pattern id="GEM-IssueStatus-Pattern"           type="JsonKeypath">/"issue_status"</pattern>
+    <pattern id="GEM-AssetName-Pattern"             type="JsonKeypath">/"asset_name"</pattern>
+    <pattern id="GEM-AssetId-Pattern"               type="JsonKeypath">/"asset_id"</pattern>
+    <pattern id="GEM-AssetType-Pattern"             type="JsonKeypath">/"asset_type"</pattern>
+    <pattern id="GEM-AffectedCount-Pattern"         type="JsonKeypath">/"affected_resources_count"</pattern>
+    <pattern id="GEM-PolicyId-Pattern"              type="JsonKeypath">/"policy_id"</pattern>
+    <pattern id="GEM-PolicyName-Pattern"            type="JsonKeypath">/"policy_name"</pattern>
+    <pattern id="GEM-DateDetected-Pattern"          type="JsonKeypath">/"date_detected"</pattern>
+    <pattern id="GEM-LastModified-Pattern"          type="JsonKeypath">/"last_modified"</pattern>
+    <pattern id="GEM-Scope-Pattern"                 type="JsonKeypath">/"scope"</pattern>
+    <pattern id="GEM-ScopeId-Pattern"               type="JsonKeypath">/"scope_id"</pattern>
+    <pattern id="GEM-RuleId-Pattern"                type="JsonKeypath">/"rule_id"</pattern>
+    <pattern id="GEM-DataClassifications-Pattern"   type="JsonKeypath">/"data_classifications"</pattern>
+
+    <!-- Custom Event Property patterns — nested array fields -->
+    <pattern id="GEM-SensitivityCategory-Pattern"   type="JsonKeypath">/"resource_classification_counts"/0/"sensitivity_tag_category"</pattern>
+    <pattern id="GEM-SensitivityCount-Pattern"      type="JsonKeypath">/"resource_classification_counts"/0/"count"</pattern>
+
+    <!-- Catch-all: matches every event so event-match-multiple fires -->
+    <pattern id="AllEvents" type="JavaPattern">(.*?)</pattern>
+
+    <!-- ── Match group ────────────────────────────────────────────────────── -->
+    <!--
+      device-type-id-override="4026" targets the Universal Cloud REST API
+      log source type.  All json-matcher order values are unique within
+      the group.
+    -->
+    <match-group order="1" device-type-id-override="4026">
+
+        <!-- Standard QRadar fields -->
+        <json-matcher field="EventName"     pattern-id="EventName-Pattern"     enable-substitutions="true" order="1"/>
+        <json-matcher field="EventCategory" pattern-id="EventCategory-Pattern" enable-substitutions="true" order="2"/>
+        <json-matcher field="UserName"      pattern-id="UserName-Pattern"      enable-substitutions="true" order="3"/>
+        <json-matcher field="DeviceAddress" pattern-id="DeviceAddress-Pattern" enable-substitutions="true" order="4"/>
+
+        <!-- Custom Event Properties -->
+        <json-matcher field="GEM Issue ID"                  pattern-id="GEM-IssueId-Pattern"              enable-substitutions="true" order="5"/>
+        <json-matcher field="GEM Sequential ID"             pattern-id="GEM-SequentialId-Pattern"         enable-substitutions="true" order="6"/>
+        <json-matcher field="GEM Issue Name"                pattern-id="GEM-IssueName-Pattern"            enable-substitutions="true" order="7"/>
+        <json-matcher field="GEM Issue Type"                pattern-id="GEM-IssueType-Pattern"            enable-substitutions="true" order="8"/>
+        <json-matcher field="GEM Issue Executor"            pattern-id="GEM-IssueExecutor-Pattern"        enable-substitutions="true" order="9"/>
+        <json-matcher field="GEM Issue Status"              pattern-id="GEM-IssueStatus-Pattern"          enable-substitutions="true" order="10"/>
+        <json-matcher field="GEM Asset Name"                pattern-id="GEM-AssetName-Pattern"            enable-substitutions="true" order="11"/>
+        <json-matcher field="GEM Asset ID"                  pattern-id="GEM-AssetId-Pattern"              enable-substitutions="true" order="12"/>
+        <json-matcher field="GEM Asset Type"                pattern-id="GEM-AssetType-Pattern"            enable-substitutions="true" order="13"/>
+        <json-matcher field="GEM Affected Resources Count"  pattern-id="GEM-AffectedCount-Pattern"        enable-substitutions="true" order="14"/>
+        <json-matcher field="GEM Policy ID"                 pattern-id="GEM-PolicyId-Pattern"             enable-substitutions="true" order="15"/>
+        <json-matcher field="GEM Policy Name"               pattern-id="GEM-PolicyName-Pattern"           enable-substitutions="true" order="16"/>
+        <json-matcher field="GEM Date Detected"             pattern-id="GEM-DateDetected-Pattern"         enable-substitutions="true" order="17"/>
+        <json-matcher field="GEM Last Modified"             pattern-id="GEM-LastModified-Pattern"         enable-substitutions="true" order="18"/>
+        <json-matcher field="GEM Scope"                     pattern-id="GEM-Scope-Pattern"                enable-substitutions="true" order="19"/>
+        <json-matcher field="GEM Scope ID"                  pattern-id="GEM-ScopeId-Pattern"              enable-substitutions="true" order="20"/>
+        <json-matcher field="GEM Rule ID"                   pattern-id="GEM-RuleId-Pattern"               enable-substitutions="true" order="21"/>
+        <json-matcher field="GEM Data Classifications"      pattern-id="GEM-DataClassifications-Pattern"  enable-substitutions="true" order="22"/>
+        <json-matcher field="GEM Sensitivity Category"      pattern-id="GEM-SensitivityCategory-Pattern"  enable-substitutions="true" order="23"/>
+        <json-matcher field="GEM Sensitivity Count"         pattern-id="GEM-SensitivityCount-Pattern"     enable-substitutions="true" order="24"/>
+
+        <!-- Catch-all: ensures every event is accepted and QID lookup runs -->
+        <event-match-multiple pattern-id="AllEvents" send-identity="UseDSMResults" force-qidmap-lookup-on-fixup="true"/>
+
+    </match-group>
+
+</ns2:device-extension>

@@ -1,0 +1,63 @@
+{
+    "status": {
+        "status": "0",
+        "message": "Success"
+    },
+    "issues": [
+        {
+            "single": {
+                "issue_id": "16",
+                "sequential_id": "ISS-0016",
+                "issue_name": "SECRETS sensitivities are violating project Dev Knowledge Manager policy",
+                "issue_type": "ISSUE_TYPE_VIOLATION",
+                "issue_executor": "ISSUE_EXECUTOR_WORKLOAD",
+                "asset_name": "medtech-dev-docs",
+                "asset_type": "ASSET_TYPE_DATASTORE",
+                "asset_id": "arn:aws:s3:::medtech-dev-docs",
+                "affected_resources_count": 4,
+                "status": "ISSUE_STATUS_OPEN",
+                "scope": "Dev Knowledge Manager",
+                "date_detected": "2026-07-31T01:00:34.809693Z",
+                "policy_name": "Dev Workload Policy",
+                "policy_id": "bc7be97c-ffa7-45f0-b8e1-dcbf19f14fed"
+            }
+        },
+        {
+            "single": {
+                "issue_id": "15",
+                "sequential_id": "ISS-0015",
+                "issue_name": "PERSONAL sensitivities are violating project Customer Success AI Agent policy",
+                "issue_type": "ISSUE_TYPE_VIOLATION",
+                "issue_executor": "ISSUE_EXECUTOR_WORKLOAD",
+                "asset_name": "CS-Internal SharePoint Site",
+                "asset_type": "ASSET_TYPE_DATASTORE",
+                "asset_id": "sharepoint://medtech-m365-tenant/sites/CS-Internal",
+                "affected_resources_count": 5,
+                "status": "ISSUE_STATUS_OPEN",
+                "scope": "Customer Success AI Agent",
+                "date_detected": "2026-07-31T01:00:33.933159Z",
+                "policy_name": "Customer Success Workload Policy",
+                "policy_id": "7b0d3aaa-7493-4542-8120-83b70a9babee"
+            }
+        },
+        {
+            "single": {
+                "issue_id": "14",
+                "sequential_id": "ISS-0014",
+                "issue_name": "PERSONAL sensitivities are violating project HR Document Management policy",
+                "issue_type": "ISSUE_TYPE_VIOLATION",
+                "issue_executor": "ISSUE_EXECUTOR_WORKLOAD",
+                "asset_name": "medtech-hr-cv-storage",
+                "asset_type": "ASSET_TYPE_DATASTORE",
+                "asset_id": "arn:aws:s3::910447411677:medtech-hr-cv-storage",
+                "affected_resources_count": 1,
+                "status": "ISSUE_STATUS_OPEN",
+                "scope": "HR Document Management",
+                "date_detected": "2026-07-31T01:00:33.070788Z",
+                "policy_name": "HR Workload Policy",
+                "policy_id": "abb06584-f973-4504-a6bd-5e69b885ae39"
+            }
+        }
+    ],
+    "count": 3
+}

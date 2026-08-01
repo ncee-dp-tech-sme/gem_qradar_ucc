@@ -1,0 +1,32 @@
+Prompt: Investigate logs/test-results.txt for the reason for error 500. Verify base64_encode() construction in the workflow. Fix if needed.
+Date: 2026-08-01 20:48:15
+
+== FINDINGS ==
+
+Pre-flight tests: ALL PASSED (DNS, TCP, SSL, HTTP proxy) — not a connectivity issue.
+
+base64_encode() syntax check: CORRECT
+  Usage: value="Basic ${base64_encode(/gem/credentials)}"
+  The path /gem/credentials has a leading slash, function call is inside ${}. Syntax is valid per UCC docs.
+
+ROOT CAUSE: Double-encoding of date_filter QueryParameter
+  In GEM-Workflow.xml (v1.1), /gem/date_filter was set with manually percent-encoded JSON:
+    %7B%22preset%22%3A%22custom%22%2C%22from%22%3A%22${/gem/date_from}%22...%7D
+
+  The UCC framework URL-encodes QueryParameter values automatically when building the HTTP request.
+  This caused the already-encoded % characters to be encoded again (%7B -> %257B), producing a
+  completely malformed filter string that the GEM API could not parse -> HTTP 500 Internal Server Error.
+
+== FIX APPLIED (v1.2) ==
+
+File: GEM_QRadar_UCC/GEM-Workflow.xml
+Change: Replace manual percent-encoding with plain XML-escaped JSON string.
+
+Before:
+  value="%7B%22preset%22%3A%22custom%22%2C%22from%22%3A%22${/gem/date_from}%22%2C%22to%22%3A%22${/gem/date_to}%22%7D"
+
+After:
+  value="{&quot;preset&quot;:&quot;custom&quot;,&quot;from&quot;:&quot;${/gem/date_from}&quot;,&quot;to&quot;:&quot;${/gem/date_to}&quot;}"
+
+The &quot; entities are required to embed double-quotes inside an XML attribute value.
+The UCC framework will correctly URL-encode the resulting JSON string when constructing the HTTP request.

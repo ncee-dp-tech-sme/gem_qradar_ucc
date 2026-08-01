@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WorkflowParameterValues xmlns="http://qradar.ibm.com/UniversalCloudRESTAPI/WorkflowParameterValues/V2">
+    <!-- Base URL of the GEM instance (hostname only, no trailing slash), e.g. gem.example.com -->
+    <Value name="gem_host"   value="" />
+    <!-- GEM API key issued by your Guardium Exposure Manager instance -->
+    <Value name="api_key"    value="" />
+    <!-- GEM API secret paired with the API key above -->
+    <Value name="api_secret" value="" />
+</WorkflowParameterValues>

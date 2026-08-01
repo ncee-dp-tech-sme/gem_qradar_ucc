@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Workflow name="GEM_OpenIssues" version="1.1" xmlns="http://qradar.ibm.com/UniversalCloudRESTAPI/Workflow/V2">
+
+    <Parameters>
+        <!-- Base URL of the GEM instance, e.g. https://gem.example.com -->
+        <Parameter name="gem_host"      label="GEM Host (base URL)"  required="true" />
+        <!-- GEM API key -->
+        <Parameter name="api_key"       label="API Key"              required="true" secret="true" />
+        <!-- GEM API secret -->
+        <Parameter name="api_secret"    label="API Secret"           required="true" secret="true" />
+    </Parameters>
+
+    <Actions>
+        <!-- ── Step 1: initialise pagination state ─────────────────────────── -->
+        <Set path="/gem/limit"  value="20" />
+        <Set path="/gem/offset" value="0"  />
+
+        <!-- ── Step 2: compute UTC midnight boundaries ─────────────────────── -->
+        <!-- today midnight (ms) = current time minus remainder after full days -->
+        <Set path="/gem/today_midnight_ms"     value="${time() - (time() mod 86400000)}" />
+        <!-- yesterday midnight (ms) = today midnight minus one full day -->
+        <Set path="/gem/yesterday_midnight_ms" value="${/gem/today_midnight_ms - 86400000}" />
+
+        <!-- Format both boundaries to ISO-8601 UTC strings -->
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss'Z'" timeZone="UTC"
+                    time="${/gem/yesterday_midnight_ms}"
+                    savePath="/gem/date_from" />
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss'Z'" timeZone="UTC"
+                    time="${/gem/today_midnight_ms}"
+                    savePath="/gem/date_to" />
+
+        <!-- ── Step 3: build the URL-encoded date-filter JSON ───────────────── -->
+        <!--
+          Decoded:  {"preset":"custom","from":"<from>","to":"<to>"}
+          Encoded:  %7B%22preset%22%3A%22custom%22%2C%22from%22%3A%22<from>%22%2C%22to%22%3A%22<to>%22%7D
+          The curly braces, quotes and colons are percent-encoded; the ISO date
+          strings contain only alphanumerics and hyphens/colons which are safe.
+        -->
+        <Set path="/gem/date_filter"
+             value="%7B%22preset%22%3A%22custom%22%2C%22from%22%3A%22${/gem/date_from}%22%2C%22to%22%3A%22${/gem/date_to}%22%7D" />
+
+        <!-- ── Step 4: assemble Basic auth credential string ────────────────── -->
+        <!-- Concatenate "apikey:apisecret" into a single string, then
+             base64-encode it inline at the CallEndpoint (see RequestHeader below).
+             This matches the Randori pattern of using base64_encode() at call time. -->
+        <Set path="/gem/credentials" value="${/api_key}:${/api_secret}" />
+
+        <!-- ── Step 5: status message ────────────────────────────────────────── -->
+        <ClearStatus />
+        <SetStatus type="INFO" message="GEM connector started. Fetching open issues from ${/gem/date_from} to ${/gem/date_to}." />
+
+        <!-- ── Step 6: paginated retrieval loop ─────────────────────────────── -->
+        <!--
+          DoWhile executes the body first, then checks the condition.
+          Condition: keep looping while a full page (count == limit) was returned.
+          When a partial page (count < limit, including zero) is received, the loop exits.
+        -->
+        <DoWhile condition="${count(/gem/response/body/issues)} = ${/gem/limit}">
+
+            <!-- Call GET /api/v1/issues -->
+            <CallEndpoint url="https://${/gem_host}/api/v1/issues" method="GET"
+                          savePath="/gem/response">
+                <!-- Basic auth via manually constructed header using runtime base64 encoding -->
+                <RequestHeader name="authorization"  value="Basic ${base64_encode(/gem/credentials)}" />
+                <RequestHeader name="Accept"         value="application/json" />
+                <RequestHeader name="Content-Type"   value="application/json" />
+
+                <QueryParameter name="offset"              value="${/gem/offset}" />
+                <QueryParameter name="limit"               value="${/gem/limit}" />
+                <QueryParameter name="filters.status[]"    value="ISSUE_STATUS_OPEN" />
+                <QueryParameter name="filters.date_detected" value="${/gem/date_filter}" />
+            </CallEndpoint>
+
+            <!-- ── Error handling: abort on non-200 ─────────────────────────── -->
+            <If condition="${/gem/response/status_code} != 200">
+                <Log type="ERROR" message="GEM API error: ${/gem/response/status_code}: ${/gem/response/status_message}" />
+                <Abort reason="${/gem/response/status_code}: ${/gem/response/status_message}" />
+            </If>
+
+            <!-- ── Fetch details and emit one event per issue ────────────────── -->
+            <If condition="${count(/gem/response/body/issues)} > 0">
+                <Log type="INFO" message="Fetching details for ${count(/gem/response/body/issues)} issues at offset ${/gem/offset}." />
+
+                <ForEach items="/gem/response/body/issues" item="/gem/issue">
+
+                    <!-- Call GET /api/v1/issues/{issue_id}/details -->
+                    <CallEndpoint url="https://${/gem_host}/api/v1/issues/${/gem/issue/single/issue_id}/details"
+                                  method="GET" savePath="/gem/detail_response">
+                        <RequestHeader name="authorization" value="Basic ${base64_encode(/gem/credentials)}" />
+                        <RequestHeader name="Accept"        value="application/json" />
+                    </CallEndpoint>
+
+                    <!-- Log and skip on error; do not abort the entire run for a single failed detail -->
+                    <If condition="${/gem/detail_response/status_code} != 200">
+                        <Log type="ERROR" message="Failed to fetch details for issue ${/gem/issue/single/issue_id}: ${/gem/detail_response/status_code}: ${/gem/detail_response/status_message}" />
+                    </If>
+                    <Else>
+                        <!-- Post the issue detail record as an individual QRadar event.
+                             The detail response body is: { "status": {...}, "issue_details": { "single": {...} } }
+                             We post only the inner issue_details/single object. -->
+                        <PostEvent path="/gem/detail_response/body/issue_details/single" source="${/gem_host}" />
+                    </Else>
+
+                </ForEach>
+            </If>
+
+            <!-- ── Advance offset by page size ───────────────────────────────── -->
+            <Set path="/gem/offset" value="${/gem/offset + /gem/limit}" />
+
+        </DoWhile>
+
+        <!-- ── Step 7: completion ────────────────────────────────────────────── -->
+        <Log type="INFO" message="GEM connector completed. Final offset reached: ${/gem/offset}." />
+
+    </Actions>
+
+    <!-- ── Connectivity pre-flight checks ────────────────────────────────────── -->
+    <Tests>
+        <DNSResolutionTest              host="${/gem_host}" />
+        <TCPConnectionTest              host="${/gem_host}" />
+        <SSLHandshakeTest               host="${/gem_host}" />
+        <HTTPConnectionThroughProxyTest url="https://${/gem_host}" />
+    </Tests>
+
+</Workflow>

@@ -1,0 +1,402 @@
+Status: 500: Internal Server Error
+Date: Aug 1, 2026 8:08 PM
+
+Log Source:
+   ID: 
+   Name: Guardium Exposure Manager
+   Description: Guardium Exposure Manager
+   Enabled: Yes
+   Log Source Type: Universal DSM
+   Protocol Type: Universal Cloud REST API
+   Groups: Other
+   Extension: 
+   Language: English
+   Target Event Collector: eventcollector0 :: qradar
+   Disconnected Log Collector: Not Set
+   Target Internal Destination: 
+   Target External Destinations: 
+   Credibility: 5
+   Internal: No
+   Deployed: Yes
+   Coalescing Events: No
+   Store Event Payloads: Yes
+   Log Source Identifier: eu.guardium.security.ibm.com
+   Workflow: <?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  QRadar Universal Cloud REST API Connector
+  Connector : Guardium Exposure Manager (GEM) - Open Issues + Details
+  Version   : 1.1
+-->
+<Workflow name="GEM_OpenIssues" version="1.1"
+          xmlns="http://qradar.ibm.com/UniversalCloudRESTAPI/Workflow/V2">
+
+    <Parameters>
+        <!-- Base URL of the GEM instance, e.g. https://gem.example.com -->
+        <Parameter name="gem_host"      label="GEM Host (base URL)"  required="true" />
+        <!-- GEM API key -->
+        <Parameter name="api_key"       label="API Key"              required="true" secret="true" />
+        <!-- GEM API secret -->
+        <Parameter name="api_secret"    label="API Secret"           required="true" secret="true" />
+    </Parameters>
+
+    <Actions>
+        <!-- ── Step 1: initialise pagination state ─────────────────────────── -->
+        <Set path="/gem/limit"  value="20" />
+        <Set path="/gem/offset" value="0"  />
+
+        <!-- ── Step 2: compute UTC midnight boundaries ─────────────────────── -->
+        <!-- Format today as midnight datetime string, then parse back to epoch ms -->
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss" timeZone="UTC" time="${time()}" savePath="/gem/today_formatted" />
+        <!-- Overwrite with the date portion only, forcing time to 00:00:00 -->
+        <RegexCapture pattern="^(\d{4}-\d{2}-\d{2})" value="${/gem/today_formatted}" savePath="/gem/today_date" />
+        <Set path="/gem/today_midnight_str" value="${/gem/today_date}T00:00:00" />
+        <ParseDate pattern="yyyy-MM-dd'T'HH:mm:ss" timeZone="UTC" date="${/gem/today_midnight_str}" savePath="/gem/today_midnight_ms" />
+
+        <!-- Subtract exactly one day (86400000 ms) to get yesterday midnight epoch -->
+        <Set path="/gem/yesterday_midnight_ms" value="${/gem/today_midnight_ms - 86400000}" />
+
+        <!-- Format both boundaries to ISO-8601 UTC strings -->
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss'Z'" timeZone="UTC"
+                    time="${/gem/yesterday_midnight_ms}"
+                    savePath="/gem/date_from" />
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss'Z'" timeZone="UTC"
+                    time="${/gem/today_midnight_ms}"
+                    savePath="/gem/date_to" />
+
+        <!-- ── Step 3: build the URL-encoded date-filter JSON ───────────────── -->
+        <!--
+          Decoded:  {"preset":"custom","from":"<from>","to":"<to>"}
+          Encoded:  %7B%22preset%22%3A%22custom%22%2C%22from%22%3A%22<from>%22%2C%22to%22%3A%22<to>%22%7D
+          The curly braces, quotes and colons are percent-encoded; the ISO date
+          strings contain only alphanumerics and hyphens/colons which are safe.
+        -->
+        <Set path="/gem/date_filter"
+             value="%7B%22preset%22%3A%22custom%22%2C%22from%22%3A%22${/gem/date_from}%22%2C%22to%22%3A%22${/gem/date_to}%22%7D" />
+
+        <!-- ── Step 4: assemble Basic auth credential string ────────────────── -->
+        <!-- Concatenate "apikey:apisecret" into a single string, then
+             base64-encode it inline at the CallEndpoint (see RequestHeader below).
+             This matches the Randori pattern of using base64_encode() at call time. -->
+        <Set path="/gem/credentials" value="${/api_key}:${/api_secret}" />
+
+        <!-- ── Step 5: status message ────────────────────────────────────────── -->
+        <ClearStatus />
+        <SetStatus type="INFO" message="GEM connector started. Fetching open issues from ${/gem/date_from} to ${/gem/date_to}." />
+
+        <!-- ── Step 6: paginated retrieval loop ─────────────────────────────── -->
+        <!--
+          DoWhile executes the body first, then checks the condition.
+          Condition: keep looping while a full page (count == limit) was returned.
+          When a partial page (count < limit, including zero) is received, the loop exits.
+        -->
+        <DoWhile condition="${count(/gem/response/body/issues)} = ${/gem/limit}">
+
+            <!-- Call GET /api/v1/issues -->
+            <CallEndpoint url="https://${/gem_host}/api/v1/issues" method="GET"
+                          savePath="/gem/response">
+                <QueryParameter name="offset"              value="${/gem/offset}" />
+                <QueryParameter name="limit"               value="${/gem/limit}" />
+                <QueryParameter name="filters.status[]"    value="ISSUE_STATUS_OPEN" />
+                <QueryParameter name="filters.date_detected" value="${/gem/date_filter}" />
+                <!-- Basic auth via manually constructed header using runtime base64 encoding -->
+                <RequestHeader name="authorization"  value="Basic ${base64_encode(/gem/credentials)}" />
+                <RequestHeader name="Accept"         value="application/json" />
+                <RequestHeader name="Content-Type"   value="application/json" />
+            </CallEndpoint>
+
+            <!-- ── Error handling: abort on non-200 ─────────────────────────── -->
+            <If condition="${/gem/response/status_code} != 200">
+                <Log type="ERROR" message="GEM API error: ${/gem/response/status_code}: ${/gem/response/status_message}" />
+                <Abort reason="${/gem/response/status_code}: ${/gem/response/status_message}" />
+            </If>
+
+            <!-- ── Fetch details and emit one event per issue ────────────────── -->
+            <If condition="${count(/gem/response/body/issues)} > 0">
+                <Log type="INFO" message="Fetching details for ${count(/gem/response/body/issues)} issues at offset ${/gem/offset}." />
+
+                <ForEach items="/gem/response/body/issues" item="/gem/issue">
+
+                    <!-- Call GET /api/v1/issues/{issue_id}/details -->
+                    <CallEndpoint url="https://${/gem_host}/api/v1/issues/${/gem/issue/single/issue_id}/details"
+                                  method="GET" savePath="/gem/detail_response">
+                        <RequestHeader name="authorization" value="Basic ${base64_encode(/gem/credentials)}" />
+                        <RequestHeader name="Accept"        value="application/json" />
+                    </CallEndpoint>
+
+                    <!-- Log and skip on error; do not abort the entire run for a single failed detail -->
+                    <If condition="${/gem/detail_response/status_code} != 200">
+                        <Log type="ERROR" message="Failed to fetch details for issue ${/gem/issue/single/issue_id}: ${/gem/detail_response/status_code}: ${/gem/detail_response/status_message}" />
+                    </If>
+                    <Else>
+                        <!-- Post the issue detail record as an individual QRadar event.
+                             The detail response body is: { "status": {...}, "issue_details": { "single": {...} } }
+                             We post only the inner issue_details/single object. -->
+                        <PostEvent path="/gem/detail_response/body/issue_details/single" source="${/gem_host}" />
+                    </Else>
+
+                </ForEach>
+            </If>
+
+            <!-- ── Advance offset by page size ───────────────────────────────── -->
+            <Set path="/gem/offset" value="${/gem/offset + /gem/limit}" />
+
+        </DoWhile>
+
+        <!-- ── Step 7: completion ────────────────────────────────────────────── -->
+        <Log type="INFO" message="GEM connector completed. Final offset reached: ${/gem/offset}." />
+
+    </Actions>
+
+    <!-- ── Connectivity pre-flight checks ────────────────────────────────────── -->
+    <Tests>
+        <DNSResolutionTest              host="${/gem_host}" />
+        <TCPConnectionTest              host="${/gem_host}" />
+        <SSLHandshakeTest               host="${/gem_host}" />
+        <HTTPConnectionThroughProxyTest url="https://${/gem_host}" />
+    </Tests>
+
+</Workflow>
+
+   Workflow Parameter Values: **********
+   Allow Untrusted Certificates: No
+   Use Proxy: No
+   Recurrence: 10M
+   EPS Throttle: 5000
+
+Testing DNS resolution of [eu.guardium.security.ibm.com] - Passed
+ - Successfully resolved [eu.guardium.security.ibm.com] to IP [95.100.110.21]
+
+Testing TCP connection to [eu.guardium.security.ibm.com:443] - Passed
+ - Attempting TCP connection to [eu.guardium.security.ibm.com:443] with a timeout of 20000 ms
+ - Successful TCP connection to [eu.guardium.security.ibm.com:443]
+
+Testing SSL connection to [eu.guardium.security.ibm.com:443] - Passed
+ - Initiating SSL handshake to [eu.guardium.security.ibm.com:443] with a timeout of 10000 ms
+ - Successful SSL handshake using Protocol [TLSv1.3] and Cipher Suite [TLS_AES_256_GCM_SHA384]
+ - Certificate Principal [CN=*.guardium.security.ibm.com, O=International Business Machines Corporation, L=Armonk, ST=New York, C=US]
+ - Debug: Certificate:
+ - Debug: [
+ - Debug: [
+ - Debug:   Version: V3
+ - Debug:   Subject: CN=*.guardium.security.ibm.com, O=International Business Machines Corporation, L=Armonk, ST=New York, C=US
+ - Debug:   Signature Algorithm: SHA384withECDSA, OID = 1.2.840.10045.4.3.3
+ - Debug: 
+ - Debug:   Key:  Sun EC public key, 256 bits
+ - Debug:   public x coord: 74040104162901241940944508749331516944369324157498481976400692644015328272956
+ - Debug:   public y coord: 11348540193083957636558363792989368089781788701115001524664499477822630671292
+ - Debug:   parameters: secp256r1 [NIST P-256,X9.62 prime256v1] (1.2.840.10045.3.1.7)
+ - Debug:   Validity: [From: Fri Aug 29 02:00:00 CEST 2025,
+ - Debug:                To: Sun Aug 30 01:59:59 CEST 2026]
+ - Debug:   Issuer: CN=DigiCert Global G3 TLS ECC SHA384 2020 CA1, O=DigiCert Inc, C=US
+ - Debug:   SerialNumber: [    0d356019 9e8cbbfa 51752a0e c9a4fd10]
+ - Debug: 
+ - Debug: Certificate Extensions: 10
+ - Debug: [1]: ObjectId: 1.3.6.1.4.1.11129.2.4.2 Criticality=false
+ - Debug: Extension unknown: DER encoded OCTET string =
+ - Debug: 0000: 04 82 01 6F 04 82 01 6B   01 69 00 77 00 D8 09 55  ...o...k.i.w...U
+ - Debug: 0010: 3B 94 4F 7A FF C8 16 19   6F 94 4F 85 AB B0 F8 FC  ;.Oz....o.O.....
+ - Debug: 0020: 5E 87 55 26 0F 15 D1 2E   72 BB 45 4B 14 00 00 01  ^.U&....r.EK....
+ - Debug: 0030: 98 F6 72 A4 B0 00 00 04   03 00 48 30 46 02 21 00  ..r.......H0F.!.
+ - Debug: 0040: 95 00 0F 58 9C 26 B2 BF   F1 C3 5B 7F 3D 17 6D F3  ...X.&....[.=.m.
+ - Debug: 0050: DA 32 C4 F9 20 05 88 53   9C 2D 0A 1C 97 A5 20 61  .2.. ..S.-.... a
+ - Debug: 0060: 02 21 00 D3 F6 C8 0D 74   A5 9F 30 B2 55 80 EA E4  .!.....t..0.U...
+ - Debug: 0070: 0A BA 35 B2 A7 BC C3 77   01 E1 4F 10 ED DD 0C 5B  ..5....w..O....[
+ - Debug: 0080: 1F AC 47 00 76 00 C2 31   7E 57 45 19 A3 45 EE 7F  ..G.v..1.WE..E..
+ - Debug: 0090: 38 DE B2 90 41 EB C7 C2   21 5A 22 BF 7F D5 B5 AD  8...A...!Z".....
+ - Debug: 00A0: 76 9A D9 0E 52 CD 00 00   01 98 F6 72 A4 A0 00 00  v...R......r....
+ - Debug: 00B0: 04 03 00 47 30 45 02 21   00 C3 95 03 70 BD 8E 00  ...G0E.!....p...
+ - Debug: 00C0: 60 86 0B 6F 97 63 BC C9   38 34 29 9F 04 F3 9C 1C  `..o.c..84).....
+ - Debug: 00D0: 35 46 EF 00 F6 65 14 2B   4A 02 20 30 F1 A2 41 5B  5F...e.+J. 0..A[
+ - Debug: 00E0: ED BC 35 51 F8 D3 18 99   19 5B 2D 19 D1 DB 99 1C  ..5Q.....[-.....
+ - Debug: 00F0: 14 18 72 2E F7 08 5E AA   4C ED 58 00 76 00 94 4E  ..r...^.L.X.v..N
+ - Debug: 0100: 43 87 FA EC C1 EF 81 F3   19 24 26 A8 18 65 01 C7  C........$&..e..
+ - Debug: 0110: D3 5F 38 02 01 3F 72 67   7D 55 37 2E 19 D8 00 00  ._8..?rg.U7.....
+ - Debug: 0120: 01 98 F6 72 A4 B4 00 00   04 03 00 47 30 45 02 20  ...r.......G0E. 
+ - Debug: 0130: 43 0C C2 79 58 7F E5 39   9B AD 2F C3 3C A1 CC 4F  C..yX..9../.<..O
+ - Debug: 0140: 83 DE 4D AB BF 38 5D 0D   0F 36 4B FA 14 05 CD 7F  ..M..8]..6K.....
+ - Debug: 0150: 02 21 00 8A 8B 90 41 1A   06 D9 67 CC 99 D6 BB 19  .!....A...g.....
+ - Debug: 0160: 6B CB 97 F9 E9 C1 61 E0   BE 99 19 CA D1 F7 D1 30  k.....a........0
+ - Debug: 0170: 4F 62 7D                                           Ob.
+ - Debug: 
+ - Debug: 
+ - Debug: [2]: ObjectId: 1.3.6.1.5.5.7.1.1 Criticality=false
+ - Debug: AuthorityInfoAccess [
+ - Debug:   [
+ - Debug:    accessMethod: ocsp
+ - Debug:    accessLocation: URIName: http://ocsp.digicert.com
+ - Debug: , 
+ - Debug:    accessMethod: caIssuers
+ - Debug:    accessLocation: URIName: http://cacerts.digicert.com/DigiCertGlobalG3TLSECCSHA3842020CA1-2.crt
+ - Debug: ]
+ - Debug: ]
+ - Debug: 
+ - Debug: [3]: ObjectId: 2.5.29.35 Criticality=false
+ - Debug: AuthorityKeyIdentifier [
+ - Debug: KeyIdentifier [
+ - Debug: 0000: 8A 23 EB 9E 6B D7 F9 37   5D F9 6D 21 39 76 9A A1  .#..k..7].m!9v..
+ - Debug: 0010: 67 DE 10 A8                                        g...
+ - Debug: ]
+ - Debug: ]
+ - Debug: 
+ - Debug: [4]: ObjectId: 2.5.29.19 Criticality=true
+ - Debug: BasicConstraints:[
+ - Debug:   CA:false
+ - Debug:   PathLen: undefined
+ - Debug: ]
+ - Debug: 
+ - Debug: [5]: ObjectId: 2.5.29.31 Criticality=false
+ - Debug: CRLDistributionPoints [
+ - Debug:   [DistributionPoint:
+ - Debug:      [URIName: http://crl3.digicert.com/DigiCertGlobalG3TLSECCSHA3842020CA1-2.crl]
+ - Debug: , DistributionPoint:
+ - Debug:      [URIName: http://crl4.digicert.com/DigiCertGlobalG3TLSECCSHA3842020CA1-2.crl]
+ - Debug: ]]
+ - Debug: 
+ - Debug: [6]: ObjectId: 2.5.29.32 Criticality=false
+ - Debug: CertificatePolicies [
+ - Debug:   [CertificatePolicyId: [2.23.140.1.2.2]
+ - Debug: [PolicyQualifierInfo: [
+ - Debug:   qualifierID: 1.3.6.1.5.5.7.2.1
+ - Debug:   qualifier: 0000: 16 1B 68 74 74 70 3A 2F   2F 77 77 77 2E 64 69 67  ..http://www.dig
+ - Debug: 0010: 69 63 65 72 74 2E 63 6F   6D 2F 43 50 53           icert.com/CPS
+ - Debug: 
+ - Debug: ]]  ]
+ - Debug: ]
+ - Debug: 
+ - Debug: [7]: ObjectId: 2.5.29.37 Criticality=false
+ - Debug: ExtendedKeyUsages [
+ - Debug:   serverAuth
+ - Debug:   clientAuth
+ - Debug: ]
+ - Debug: 
+ - Debug: [8]: ObjectId: 2.5.29.15 Criticality=true
+ - Debug: KeyUsage [
+ - Debug:   DigitalSignature
+ - Debug:   Key_Agreement
+ - Debug: ]
+ - Debug: 
+ - Debug: [9]: ObjectId: 2.5.29.17 Criticality=false
+ - Debug: SubjectAlternativeName [
+ - Debug:   DNSName: *.guardium.security.ibm.com
+ - Debug:   DNSName: guardium.security.ibm.com
+ - Debug: ]
+ - Debug: 
+ - Debug: [10]: ObjectId: 2.5.29.14 Criticality=false
+ - Debug: SubjectKeyIdentifier [
+ - Debug: KeyIdentifier [
+ - Debug: 0000: B6 81 0E C9 35 01 3F A0   01 80 E9 53 09 2A 4A C9  ....5.?....S.*J.
+ - Debug: 0010: 26 34 6B 03                                        &4k.
+ - Debug: ]
+ - Debug: ]
+ - Debug: 
+ - Debug: ]
+ - Debug:   Algorithm: [SHA384withECDSA]
+ - Debug:   Signature:
+ - Debug: 0000: 30 64 02 30 2A 3C 01 1C   7E DE 56 3A 20 BA 13 72  0d.0*<....V: ..r
+ - Debug: 0010: 9D 3F 30 51 65 7B 21 A3   DC FB 85 ED 9B 65 6B 76  .?0Qe.!......ekv
+ - Debug: 0020: 33 7D F3 D0 3F 8F 95 C2   92 67 34 77 3B E5 AB 32  3...?....g4w;..2
+ - Debug: 0030: 3D 28 CC D0 02 30 60 3E   4A 07 E5 09 5A BA D6 6C  =(...0`>J...Z..l
+ - Debug: 0040: B1 D9 8D B5 9E BD 96 3B   E8 15 CD CF A4 EA 13 BC  .......;........
+ - Debug: 0050: 20 2B 90 10 0B 5B 29 39   62 A4 1B 61 B6 E6 B3 C2   +...[)9b..a....
+ - Debug: 0060: 7D 06 F5 86 87 2C                                  .....,
+ - Debug: 
+ - Debug: ]
+ - Debug: Certificate:
+ - Debug: [
+ - Debug: [
+ - Debug:   Version: V3
+ - Debug:   Subject: CN=DigiCert Global G3 TLS ECC SHA384 2020 CA1, O=DigiCert Inc, C=US
+ - Debug:   Signature Algorithm: SHA384withECDSA, OID = 1.2.840.10045.4.3.3
+ - Debug: 
+ - Debug:   Key:  Sun EC public key, 384 bits
+ - Debug:   public x coord: 18571665203115842511811831865300081460948672252817284294409089785152024152494775212246628017655729743289845191262931
+ - Debug:   public y coord: 23182664101230737597920388121044451252834827633642490409167657026119687479048534124760601567054375558081681623086439
+ - Debug:   parameters: secp384r1 [NIST P-384] (1.3.132.0.34)
+ - Debug:   Validity: [From: Wed Apr 14 02:00:00 CEST 2021,
+ - Debug:                To: Mon Apr 14 01:59:59 CEST 2031]
+ - Debug:   Issuer: CN=DigiCert Global Root G3, OU=www.digicert.com, O=DigiCert Inc, C=US
+ - Debug:   SerialNumber: [    0b00e92d 4d6d731f ca3059c7 cb1e1886]
+ - Debug: 
+ - Debug: Certificate Extensions: 8
+ - Debug: [1]: ObjectId: 1.3.6.1.5.5.7.1.1 Criticality=false
+ - Debug: AuthorityInfoAccess [
+ - Debug:   [
+ - Debug:    accessMethod: ocsp
+ - Debug:    accessLocation: URIName: http://ocsp.digicert.com
+ - Debug: , 
+ - Debug:    accessMethod: caIssuers
+ - Debug:    accessLocation: URIName: http://cacerts.digicert.com/DigiCertGlobalRootG3.crt
+ - Debug: ]
+ - Debug: ]
+ - Debug: 
+ - Debug: [2]: ObjectId: 2.5.29.35 Criticality=false
+ - Debug: AuthorityKeyIdentifier [
+ - Debug: KeyIdentifier [
+ - Debug: 0000: B3 DB 48 A4 F9 A1 C5 D8   AE 36 41 CC 11 63 69 62  ..H......6A..cib
+ - Debug: 0010: 29 BC 4B C6                                        ).K.
+ - Debug: ]
+ - Debug: ]
+ - Debug: 
+ - Debug: [3]: ObjectId: 2.5.29.19 Criticality=true
+ - Debug: BasicConstraints:[
+ - Debug:   CA:true
+ - Debug:   PathLen:0
+ - Debug: ]
+ - Debug: 
+ - Debug: [4]: ObjectId: 2.5.29.31 Criticality=false
+ - Debug: CRLDistributionPoints [
+ - Debug:   [DistributionPoint:
+ - Debug:      [URIName: http://crl3.digicert.com/DigiCertGlobalRootG3.crl]
+ - Debug: ]]
+ - Debug: 
+ - Debug: [5]: ObjectId: 2.5.29.32 Criticality=false
+ - Debug: CertificatePolicies [
+ - Debug:   [CertificatePolicyId: [2.16.840.1.114412.2.1]
+ - Debug: []  ]
+ - Debug:   [CertificatePolicyId: [2.23.140.1.1]
+ - Debug: []  ]
+ - Debug:   [CertificatePolicyId: [2.23.140.1.2.1]
+ - Debug: []  ]
+ - Debug:   [CertificatePolicyId: [2.23.140.1.2.2]
+ - Debug: []  ]
+ - Debug:   [CertificatePolicyId: [2.23.140.1.2.3]
+ - Debug: []  ]
+ - Debug: ]
+ - Debug: 
+ - Debug: [6]: ObjectId: 2.5.29.37 Criticality=false
+ - Debug: ExtendedKeyUsages [
+ - Debug:   serverAuth
+ - Debug:   clientAuth
+ - Debug: ]
+ - Debug: 
+ - Debug: [7]: ObjectId: 2.5.29.15 Criticality=true
+ - Debug: KeyUsage [
+ - Debug:   DigitalSignature
+ - Debug:   Key_CertSign
+ - Debug:   Crl_Sign
+ - Debug: ]
+ - Debug: 
+ - Debug: [8]: ObjectId: 2.5.29.14 Criticality=false
+ - Debug: SubjectKeyIdentifier [
+ - Debug: KeyIdentifier [
+ - Debug: 0000: 8A 23 EB 9E 6B D7 F9 37   5D F9 6D 21 39 76 9A A1  .#..k..7].m!9v..
+ - Debug: 0010: 67 DE 10 A8                                        g...
+ - Debug: ]
+ - Debug: ]
+ - Debug: 
+ - Debug: ]
+ - Debug:   Algorithm: [SHA384withECDSA]
+ - Debug:   Signature:
+ - Debug: 0000: 30 65 02 30 7E 26 58 6E   EE 88 EC 0C DD 15 41 EE  0e.0.&Xn......A.
+ - Debug: 0010: 7A B8 99 99 70 D1 62 65   4F A0 20 9E 47 B1 5B C1  z...p.beO. .G.[.
+ - Debug: 0020: B2 67 31 1D CC 72 7A AF   22 72 40 42 6E 65 84 FE  .g1..rz."r@Bne..
+ - Debug: 0030: 87 4B 0F 19 02 31 00 E6   BF D6 AE 34 87 5B 3F 67  .K...1.....4.[?g
+ - Debug: 0040: C7 1D A8 6F D5 12 78 B5   E6 87 31 44 A9 5D C6 B8  ...o..x...1D.]..
+ - Debug: 0050: 78 CC CF EF D4 32 58 11   FF 3A 85 06 3C 1D 84 6F  x....2X..:..<..o
+ - Debug: 0060: D3 F5 F9 DA 33 1C A4                               ....3..
+ - Debug: 
+ - Debug: ]
+
+Events (0):
+ - Error: 500: Internal Server Error
+ - Error: 500: Internal Server Error

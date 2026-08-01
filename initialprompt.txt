@@ -1,0 +1,66 @@
+initial prompt:
+
+Create a QRadar Universal Cloud Connector that retrieves open issues from Guardium Exposure Manager (GEM). Follow the steps below precisely.
+
+---
+
+**INVESTIGATION PHASE**
+
+Before writing any code, perform the following:
+
+1. Read all files in the `@examples/` directory and fully understand the structure, conventions, and patterns used in each working connector (workflow definition, parameter declarations, authentication handling, pagination, event posting, error handling, etc.).
+2. Read all schema files in the `@workflows/` directory and understand every schema that must be referenced, including their required fields, types, and how they are referenced in the examples.
+3. Identify and document:
+   - The exact workflow schema reference format used in the examples.
+   - How authentication headers are declared and injected.
+   - How pagination is handled (offset/limit pattern).
+   - How date range parameters (from/to) are constructed and passed dynamically so that "last day" is always computed at runtime relative to the current execution time.
+   - How events or records are posted/emitted to QRadar.
+   - Any required metadata fields (connector name, version, log source type, etc.).
+
+---
+
+**PLANNING PHASE**
+
+Produce a written plan (as code comments or a markdown block within the file) that outlines:
+
+1. The full connector file structure.
+2. Every workflow step in execution order with its purpose.
+3. How the GEM API URL will be constructed dynamically, including the date range for the last 24 hours computed at runtime.
+4. How pagination will be implemented to retrieve all open issues beyond the initial 20-item limit.
+5. How the authorization header will be constructed: `authorization: Basic <base64(apikey:apisecret)>` — clarify whether the base64 encoding is performed at runtime within the workflow or whether the encoded value is provided as a static parameter, and choose the approach consistent with the examples.
+6. How the connector will handle API errors and empty result sets.
+
+---
+
+**IMPLEMENTATION PHASE**
+
+Implement the connector strictly following the patterns, schema references, and conventions observed in the `@examples/` and `@workflows/` directories. The implementation must include:
+
+1. **Connector metadata**: name, version, description, and any required identifiers consistent with the examples.
+2. **Parameters**: declare all required user-configurable parameters (GEM base URL, API key, API secret, or pre-encoded credential — whichever is consistent with examples), with descriptions and types.
+3. **Dynamic date range**: compute `from` as the start of the previous UTC day and `to` as the start of the current UTC day (i.e., a 24-hour window for yesterday), and URL-encode the date filter JSON object exactly as shown in the GEM URL format:
+   - Decoded form: `filters.date_detected={"preset":"custom","from":"<from_datetime>","to":"<to_datetime>"}`
+   - URL-encoded form matching the pattern: `filters.date_detected=%7B%22preset%22%3A%22custom%22%2C%22from%22%3A%22<from>%22%2C%22to%22%3A%22<to>%22%7D`
+4. **Pagination loop**: start at `offset=0` with `limit=20`, increment offset by 20 on each iteration, and continue until the number of returned issues is less than the limit or the result set is empty.
+5. **Authorization header**: set the HTTP request header `authorization: Basic <value>` using the approach consistent with the examples.
+6. **Issue retrieval**: call `GET /api/v1/issues` with query parameters:
+   - `offset=<current_offset>`
+   - `limit=20`
+   - `filters.status[]=ISSUE_STATUS_OPEN`
+   - `filters.date_detected=<url_encoded_date_filter_json>`
+7. **Event emission**: post each retrieved issue as an individual event to QRadar using the method shown in the examples.
+8. **Error handling**: handle HTTP errors, empty responses, and unexpected payloads gracefully, consistent with patterns in the examples.
+9. **Schema references**: reference all required `@workflows/` schemas exactly as done in the examples — do not invent or omit schema references.
+
+---
+
+**VALIDATION**
+
+After implementation, verify:
+
+- Every schema reference points to an existing file in `@workflows/`.
+- The URL construction for the GEM API exactly matches the format shown in the example URL.
+- The authorization header format is `authorization: Basic apikey:apisecret:base64decoded` as specified.
+- The pagination logic correctly terminates.
+- The connector follows all structural conventions observed in the `@examples/` files without deviation.

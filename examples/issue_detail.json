@@ -1,0 +1,52 @@
+{
+    "status": {
+        "status": "0",
+        "message": "Success"
+    },
+    "issue_details": {
+        "single": {
+            "issue_id": "16",
+            "sequential_id": "ISS-0016",
+            "issue_name": "SECRETS sensitivities are violating project Dev Knowledge Manager policy",
+            "issue_type": "ISSUE_TYPE_VIOLATION",
+            "issue_executor": "ISSUE_EXECUTOR_WORKLOAD",
+            "asset_name": "medtech-dev-docs",
+            "asset_id": "arn:aws:s3:::medtech-dev-docs",
+            "asset_type": "ASSET_TYPE_DATASTORE",
+            "affected_resources_count": 4,
+            "resource_classification_counts": [
+                {
+                    "sensitivity_tag_category": "SECRETS",
+                    "count": 2
+                }
+            ],
+            "issue_status": "ISSUE_STATUS_OPEN",
+            "policy_id": "bc7be97c-ffa7-45f0-b8e1-dcbf19f14fed",
+            "policy_name": "Dev Workload Policy",
+            "date_detected": "2026-07-31T01:00:34.809693Z",
+            "last_modified": "2026-08-01T01:00:29.269356Z",
+            "scope": "Dev Knowledge Manager",
+            "scope_id": "proj-dev-kb-001",
+            "timeline": [
+                {
+                    "event_type": "ISSUE_EVENT_TYPE_STATUS_CHANGE",
+                    "event_time": "2026-08-01T01:00:29.269356Z",
+                    "event_actor_id": "system",
+                    "event_actor_name": "System",
+                    "issue_status": "ISSUE_STATUS_OPEN"
+                },
+                {
+                    "event_type": "ISSUE_EVENT_TYPE_STATUS_CHANGE",
+                    "event_time": "2026-07-31T01:00:34.809693Z",
+                    "event_actor_id": "system",
+                    "event_actor_name": "System",
+                    "issue_status": "ISSUE_STATUS_OPEN"
+                }
+            ],
+            "rule_id": "aec078c2-ea90-49cb-a915-bf8b7de94b60",
+            "data_classifications": [
+                "SECRETS"
+            ]
+        }
+    }
+}

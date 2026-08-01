@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:device-extension xmlns:ns2="event_parsing/device_extension">
+    <pattern id="EventCategory-Pattern-1" type="JsonKeypath">/"scheduleName"</pattern>
+    <pattern id="EventName-Pattern-1" type="JsonKeypath">/"status"</pattern>
+    <pattern id="UserName-Pattern-1" type="JsonKeypath">/"userName"</pattern>
+    <pattern id="AllEvents" type="JavaPattern">(.*?)</pattern>
+    <match-group order="1" device-type-id-override="4011">
+        <json-matcher field="EventCategory" pattern-id="EventCategory-Pattern-1" enable-substitutions="true" order="1"/>
+        <json-matcher field="EventName" pattern-id="EventName-Pattern-1" enable-substitutions="true" order="1"/>
+        <json-matcher field="UserName" pattern-id="UserName-Pattern-1" enable-substitutions="true" order="1"/>
+        <event-match-multiple pattern-id="AllEvents" send-identity="UseDSMResults" force-qidmap-lookup-on-fixup="true"/>
+    </match-group>
+</ns2:device-extension>
