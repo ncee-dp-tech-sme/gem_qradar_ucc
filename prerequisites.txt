@@ -1,0 +1,2 @@
+URL FOR OPEN ISSUES LAST DAY: /api/v1/issues?offset=0&limit=20&filters.status%5B%5D=ISSUE_STATUS_OPEN&filters.date_detected=%7B%22preset%22%3A%22custom%22%2C%22from%22%3A%222026-07-31T00%3A00%3A00.000Z%22%2C%22to%22%3A%222026-08-01T00%3A00%3A00.000Z%22%7D' --header 'accept: application/json' \
+Required authorization header must be 'authorization: Basic apikey:apisecret:base64decoded'
