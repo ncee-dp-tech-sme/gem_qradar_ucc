@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  QRadar Universal Cloud REST API Connector
+  Connector : Guardium Exposure Manager (GEM) - Activity Log
+  Version   : 1.1
+  Change log:
+  - 2026-08-01 v1.0: Initial release with paginated activity log retrieval and
+                     dynamic 10-minute rolling date window for QUERY_FROM_DATE /
+                     QUERY_TO_DATE runtime parameters.
+  - 2026-08-01 v1.1: Fix gem_host to hostname-only (no scheme); prefix https:// at
+                     call sites. Resolves Client Protocol Exception: null caused by
+                     passing a full URL to DNS/TCP/SSL pre-flight test elements.
+-->
+<Workflow name="GEM_ActivityLog" version="1.1"
+          xmlns="http://qradar.ibm.com/UniversalCloudRESTAPI/Workflow/V2">
+
+    <Parameters>
+        <!-- Hostname of the GEM instance only — no scheme, no trailing slash, e.g. eu.guardium.security.ibm.com -->
+        <Parameter name="gem_host"         label="GEM Host (hostname only)"         required="true" />
+        <!-- GEM API key -->
+        <Parameter name="api_key"          label="API Key"                           required="true" secret="true" />
+        <!-- GEM API secret -->
+        <Parameter name="api_secret"       label="API Secret"                        required="true" secret="true" />
+        <!-- Activity log report ID (default: 000000000000000000002001) -->
+        <Parameter name="report_id"        label="Activity Log Report ID"            required="true" />
+        <!-- Number of records to retrieve per page (default: 500) -->
+        <Parameter name="fetch_size"       label="Fetch Size (records per page)"     required="true" />
+        <!-- Recurrence interval in minutes (default: 10) — must match the log source recurrence schedule -->
+        <Parameter name="recurrence_minutes" label="Recurrence Interval (minutes)"  required="true" />
+    </Parameters>
+
+    <Actions>
+        <!-- ── Step 1: initialise pagination state ─────────────────────────── -->
+        <Set path="/gem/offset" value="0" />
+
+        <!-- ── Step 2: compute rolling date window ─────────────────────────── -->
+        <!--
+          to   = current execution time (now)
+          from = now - (recurrence_minutes * 60 * 1000 ms)
+
+          This ensures each run covers exactly the preceding interval with no
+          gaps or overlaps, regardless of when the schedule fires.
+        -->
+        <Set path="/gem/interval_ms"   value="${/recurrence_minutes * 60000}" />
+        <Set path="/gem/to_epoch_ms"   value="${time()}" />
+        <Set path="/gem/from_epoch_ms" value="${/gem/to_epoch_ms - /gem/interval_ms}" />
+
+        <!-- Format both boundaries as ISO-8601 UTC strings required by the GEM API -->
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timeZone="UTC"
+                    time="${/gem/from_epoch_ms}"
+                    savePath="/gem/date_from" />
+        <FormatDate pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timeZone="UTC"
+                    time="${/gem/to_epoch_ms}"
+                    savePath="/gem/date_to" />
+
+        <!-- ── Step 3: assemble Basic auth credential string ───────────────── -->
+        <!-- Concatenate "apikey:apisecret" to base64-encode at call time -->
+        <Set path="/gem/credentials" value="${/api_key}:${/api_secret}" />
+
+        <!-- ── Step 4: status message ──────────────────────────────────────── -->
+        <ClearStatus />
+        <SetStatus type="INFO"
+                   message="GEM Activity Log connector started. Fetching activity log from ${/gem/date_from} to ${/gem/date_to}." />
+
+        <!-- ── Step 5: paginated retrieval loop ────────────────────────────── -->
+        <!--
+          DoWhile executes the body first, then checks the condition.
+          Keep looping while a full page (count == fetch_size) was returned.
+          When a partial page (count < fetch_size, including zero) is returned
+          the loop exits — all records have been retrieved.
+        -->
+        <DoWhile condition="${count(/gem/response/body/result/data)} = ${/fetch_size}">
+
+            <!-- POST /api/v3/reports/run -->
+            <CallEndpoint url="https://${/gem_host}/api/v3/reports/run" method="POST"
+                          savePath="/gem/response">
+                <RequestHeader name="authorization" value="Basic ${base64_encode(/gem/credentials)}" />
+                <RequestHeader name="Accept"        value="application/json" />
+                <RequestHeader name="Content-Type"  value="application/json" />
+                <RequestBody type="JSON" encoding="UTF-8">
+                    {
+                        "fetch_size": ${/fetch_size},
+                        "offset": ${/gem/offset},
+                        "report_id": "${/report_id}",
+                        "runtime_parameter_list": [
+                            {
+                                "key": "QUERY_FROM_DATE",
+                                "runtime_parameter_type": "DATE",
+                                "value": "${/gem/date_from}"
+                            },
+                            {
+                                "key": "QUERY_TO_DATE",
+                                "runtime_parameter_type": "DATE",
+                                "value": "${/gem/date_to}"
+                            }
+                        ],
+                        "without_limit": true
+                    }
+                </RequestBody>
+            </CallEndpoint>
+
+            <!-- ── Error handling: abort on non-200 ──────────────────────── -->
+            <If condition="${/gem/response/status_code} != 200">
+                <Log type="ERROR"
+                     message="GEM API error: ${/gem/response/status_code}: ${/gem/response/status_message}" />
+                <Abort reason="${/gem/response/status_code}: ${/gem/response/status_message}" />
+            </If>
+
+            <!-- ── Emit one event per activity log record ─────────────────── -->
+            <!--
+              The API response structure is:
+                { "result": { "data": [ { "results": { "1": "...", ... "7": "..." } }, ... ] } }
+
+              Each element in result.data[].results maps numeric keys to field values:
+                "1" = CreationTimeUTC
+                "2" = PerformedBy
+                "3" = Context
+                "4" = ActionTaken
+                "5" = ContextDescription
+                "6" = Activity
+                "7" = AuditTrailID
+
+              We post the flattened results object for each record so that the
+              Log Source Extension can map the numeric keys to QRadar fields.
+            -->
+            <If condition="${count(/gem/response/body/result/data)} > 0">
+                <Log type="INFO"
+                     message="Processing ${count(/gem/response/body/result/data)} activity log records at offset ${/gem/offset}." />
+
+                <ForEach items="/gem/response/body/result/data" item="/gem/activity">
+                    <PostEvent path="/gem/activity/results" source="${/gem_host}" />
+                </ForEach>
+            </If>
+
+            <!-- ── Advance offset by page size ───────────────────────────── -->
+            <Set path="/gem/offset" value="${/gem/offset + /fetch_size}" />
+
+        </DoWhile>
+
+        <!-- ── Step 6: completion ─────────────────────────────────────────── -->
+        <Log type="INFO"
+             message="GEM Activity Log connector completed. Total records processed up to offset: ${/gem/offset}." />
+
+    </Actions>
+
+    <!-- ── Connectivity pre-flight checks ──────────────────────────────────── -->
+    <Tests>
+        <DNSResolutionTest              host="${/gem_host}" />
+        <TCPConnectionTest              host="${/gem_host}" />
+        <SSLHandshakeTest               host="${/gem_host}" />
+        <HTTPConnectionThroughProxyTest url="https://${/gem_host}" />
+    </Tests>
+
+</Workflow>

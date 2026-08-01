@@ -1,0 +1,426 @@
+{
+    "result": {
+        "report_layout": {
+            "report_id": "000000000000000000002001",
+            "report_name": "Activity log",
+            "report_description": "A log of all activities within Guardium",
+            "report_headers": [
+                {
+                    "header_id": "2007",
+                    "header_name": "CreationTimeUTC",
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_CREATIONTIMEUTC_DESCRIPTION",
+                        "nls_value": "Date and time the activity was created"
+                    },
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_CREATIONTIMEUTC",
+                        "nls_value": "Date created (local time)"
+                    },
+                    "sequence": 1
+                },
+                {
+                    "header_id": "2001",
+                    "header_name": "PerformedBy",
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_PERFORMED_BY_DESCRIPTION",
+                        "nls_value": "The user who performs the activity"
+                    },
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_PERFORMED_BY",
+                        "nls_value": "Performed by"
+                    },
+                    "sequence": 2
+                },
+                {
+                    "header_id": "2002",
+                    "header_name": "Context",
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT_COLUMN_DESCRIPTION",
+                        "nls_value": "The service context of the activity"
+                    },
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT",
+                        "nls_value": "Context"
+                    },
+                    "sequence": 3
+                },
+                {
+                    "header_id": "2003",
+                    "header_name": "ActionTaken",
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_ACTION_TAKEN_DESCRIPTION",
+                        "nls_value": "The action taken by the activity"
+                    },
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_ACTION_TAKEN",
+                        "nls_value": "Action taken"
+                    },
+                    "sequence": 4
+                },
+                {
+                    "header_id": "2004",
+                    "header_name": "ContextDescription",
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT_DESCRIPTION_DESCRIPTION",
+                        "nls_value": "The detailed context description of the activity"
+                    },
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_CONTEXT_DESCRIPTION",
+                        "nls_value": "Context description"
+                    },
+                    "sequence": 5
+                },
+                {
+                    "header_id": "2005",
+                    "header_name": "Activity",
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_ACTIVITY_DESCRIPTION",
+                        "nls_value": "The detailed context of the activity"
+                    },
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_ACTIVITY",
+                        "nls_value": "Activity"
+                    },
+                    "sequence": 6
+                },
+                {
+                    "header_id": "2006",
+                    "header_name": "AuditTrailID",
+                    "header_description": {
+                        "nls_key": "ACTIVITY_LOG_AUDIT_TRAIL_ID_DESCRIPTION",
+                        "nls_value": "The audited trail id of the activity"
+                    },
+                    "field_name": {
+                        "nls_key": "ACTIVITY_LOG_AUDIT_TRAIL_ID",
+                        "nls_value": "Audit trail ID"
+                    },
+                    "sequence": 7
+                }
+            ],
+            "runtime_param_list": [
+                {
+                    "key": "QUERY_FROM_DATE",
+                    "label": "Time From",
+                    "runtime_parameter_type": "DATE_UTC",
+                    "runtime_parameter_type_length": 10,
+                    "operator_type": "GREATER_THAN_OR_EQUAL"
+                },
+                {
+                    "key": "QUERY_TO_DATE",
+                    "label": "Time To",
+                    "runtime_parameter_type": "DATE_UTC",
+                    "runtime_parameter_type_length": 10,
+                    "operator_type": "LESS_THAN"
+                }
+            ],
+            "is_predefined": true
+        },
+        "data": [
+            {
+                "results": {
+                    "1": "2026-08-01 22:12:55.751747",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|53dda78d-cb5c-4d51-9302-0fbf47920602]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 22:12:55.69052",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|0d39726c-1922-4a4a-b183-2c9a942e8511]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 22:12:52.045589",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 22:12:30.984149",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|d64aa0a2-a28a-40fc-9a96-7f1261720bb8]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 22:12:30.885995",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|1bf175b9-796e-4d93-8975-c6d2a479ba10]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 22:12:28.342986",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 22:10:28.057099",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:55.758991",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|d8938346-fecd-4845-93b3-dafceb0e786b]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:55.707861",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|a885a511-f773-499e-a3fa-6de4cf222beb]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:52.265175",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Audit results log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000001301"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:49.665995",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|54564aeb-54e5-4281-ad3b-c9958a6503d7]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:49.131647",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|cf7f90ce-c57c-4402-841f-a30c3d168294]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:44.995725",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Audit results log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000001301"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:28.237561",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|aa8a363b-8a8c-4aae-b171-36a72a4bb468]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:28.215147",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Stop query",
+                    "5": "-",
+                    "6": "Succeeded",
+                    "7": "[CUSTOM_QUERY_ID|8e78fc7d-457c-4b6b-bcd2-27fe1dedb640]"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:24.509841",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            },
+            {
+                "results": {
+                    "1": "2026-08-01 20:37:01.171498",
+                    "2": "Erwin Friethoff",
+                    "3": "Reports Runner",
+                    "4": "Run report",
+                    "5": "Activity log",
+                    "6": "Succeeded",
+                    "7": "000000000000000000002001"
+                }
+            }
+        ],
+        "total_number_of_rows": 17,
+        "facets": [
+            {
+                "header_sequence": "1",
+                "nls_translation": "ACTIVITY_LOG_CREATIONTIMEUTC"
+            },
+            {
+                "header_sequence": "2",
+                "nls_translation": "ACTIVITY_LOG_PERFORMED_BY",
+                "filters": [
+                    {
+                        "value": "Erwin Friethoff",
+                        "count": 17
+                    }
+                ]
+            },
+            {
+                "header_sequence": "3",
+                "nls_translation": "ACTIVITY_LOG_CONTEXT",
+                "filters": [
+                    {
+                        "value": "Reports Runner",
+                        "count": 17
+                    }
+                ]
+            },
+            {
+                "header_sequence": "4",
+                "nls_translation": "ACTIVITY_LOG_ACTION_TAKEN",
+                "filters": [
+                    {
+                        "value": "Stop query",
+                        "count": 10
+                    },
+                    {
+                        "value": "Run report",
+                        "count": 7
+                    }
+                ]
+            },
+            {
+                "header_sequence": "5",
+                "nls_translation": "ACTIVITY_LOG_CONTEXT_DESCRIPTION",
+                "filters": [
+                    {
+                        "value": "Audit results log",
+                        "count": 2
+                    },
+                    {
+                        "value": "Activity log",
+                        "count": 5
+                    },
+                    {
+                        "value": "-",
+                        "count": 10
+                    }
+                ]
+            },
+            {
+                "header_sequence": "6",
+                "nls_translation": "ACTIVITY_LOG_ACTIVITY"
+            },
+            {
+                "header_sequence": "7",
+                "nls_translation": "ACTIVITY_LOG_AUDIT_TRAIL_ID",
+                "filters": [
+                    {
+                        "value": "[CUSTOM_QUERY_ID|8e78fc7d-457c-4b6b-bcd2-27fe1dedb640]",
+                        "count": 1
+                    },
+                    {
+                        "value": "000000000000000000002001",
+                        "count": 5
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|a885a511-f773-499e-a3fa-6de4cf222beb]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|54564aeb-54e5-4281-ad3b-c9958a6503d7]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|aa8a363b-8a8c-4aae-b171-36a72a4bb468]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|53dda78d-cb5c-4d51-9302-0fbf47920602]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|d64aa0a2-a28a-40fc-9a96-7f1261720bb8]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|d8938346-fecd-4845-93b3-dafceb0e786b]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|cf7f90ce-c57c-4402-841f-a30c3d168294]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|1bf175b9-796e-4d93-8975-c6d2a479ba10]",
+                        "count": 1
+                    },
+                    {
+                        "value": "[CUSTOM_QUERY_ID|0d39726c-1922-4a4a-b183-2c9a942e8511]",
+                        "count": 1
+                    },
+                    {
+                        "value": "000000000000000000001301",
+                        "count": 2
+                    }
+                ]
+            }
+        ],
+        "final_result": true
+    }
+}

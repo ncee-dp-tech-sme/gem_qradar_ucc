@@ -1,0 +1,64 @@
+PROMPT
+------
+Based on the previous created workflows I now want a new QRadar Universal Rest adapter to retrieve activity logs.
+I put an example of a working curl in GEM_QRadar_Activity/examples/example_curl.txt and the expected output in
+GEM_QRadar_Activity/examples/activity_result.json. I want the logsource to be able to have the date parameters.
+
+TASK OUTCOME
+------------
+Created a fully functional QRadar Universal Cloud REST API connector for GEM Activity Logs.
+
+All assets follow the same structure, naming conventions, XML formatting, and patterns as the
+existing GEM_QRadar_UCC/ connector.
+
+FILES CREATED
+-------------
+GEM_QRadar_Activity/GEM-ActivityLog-Workflow.xml
+  - UCC Workflow v1.0 (namespace: http://qradar.ibm.com/UniversalCloudRESTAPI/Workflow/V2)
+  - Workflow name: GEM_ActivityLog
+  - Authentication: Basic auth via base64_encode(api_key:api_secret), identical to existing connector
+  - Date window: dynamic rolling window [now - recurrence_minutes*60000ms, now]
+    * Prevents gaps or duplicates across consecutive runs
+    * Format: ISO-8601 UTC with milliseconds (yyyy-MM-dd'T'HH:mm:ss.SSS'Z')
+  - Paginated POST to /api/v3/reports/run with fetch_size + offset
+  - DoWhile loop exits when returned count < fetch_size (partial or empty page)
+  - PostEvent per activity record: posts the results{} object from result.data[n].results
+  - Pre-flight connectivity tests: DNS, TCP, SSL, HTTP proxy
+  - Parameters: gem_host, api_key (secret), api_secret (secret), report_id, fetch_size, recurrence_minutes
+
+GEM_QRadar_Activity/GEM-ActivityLog-WorkflowParameterValues.xml
+  - Default values: report_id=000000000000000000002001, fetch_size=500, recurrence_minutes=10
+  - gem_host, api_key, api_secret left empty for the operator to fill in before import
+
+GEM_QRadar_Activity/GEM-ActivityLog-LogSourceExtension.xml
+  - Log Source Extension (LSX) targeting device-type-id-override="4026" (Universal Cloud REST API)
+  - Maps numeric JSON keys ("1" through "7") to QRadar fields and CEPs
+  - Standard QRadar fields: EventName <- "4" (ActionTaken), UserName <- "2" (PerformedBy), StartTime <- "1" (CreationTimeUTC)
+  - 7 Custom Event Properties (CEPs): GEM Activity CreationTimeUTC, PerformedBy, Context,
+    ActionTaken, ContextDescription, Activity, AuditTrailID
+  - Catch-all JavaPattern for event-match-multiple with force-qidmap-lookup-on-fixup
+
+GEM_QRadar_Activity/README.md
+  - Full installation guide covering workflow import, parameter values, log source creation,
+    LSX import, CEP creation, and field mapping reference table
+
+KEY DESIGN DECISIONS
+--------------------
+1. Rolling date window (not fixed midnight boundaries):
+   The existing GEM_QRadar_UCC connector uses yesterday/today midnight. For a 10-minute
+   polling schedule, a rolling [now-interval, now] window is more appropriate — it ensures
+   every poll covers exactly the preceding interval with no gaps.
+
+2. recurrence_minutes parameter:
+   Instead of hardcoding 600000ms, the interval is a user-visible parameter that must be
+   kept in sync with the QRadar log source recurrence schedule. This avoids silent
+   missed/duplicated records if the schedule is changed.
+
+3. Numeric JSON key mapping:
+   The GEM Activity Log API returns results with numeric string keys ("1"–"7") rather than
+   named fields. The LSX uses JsonKeypath patterns like /"4" to extract values, which is
+   the correct QRadar JsonKeypath syntax for numeric keys.
+
+4. PostEvent posts results object directly:
+   The workflow iterates result.data[] and posts item.results (not the wrapper) so the LSX
+   sees a flat { "1": "...", "2": "...", ... } object, matching the JsonKeypath patterns.

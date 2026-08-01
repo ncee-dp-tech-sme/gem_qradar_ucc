@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ============================================================
+  QRadar Log Source Extension (LSX)
+  Product : Guardium Exposure Manager (GEM) - Activity Log
+  Version : 1.0
+  Date    : 2026-08-01
+
+  Purpose
+  -------
+  Parses JSON events posted by the GEM Activity Log Universal Cloud
+  REST API Workflow and maps every field to QRadar event properties
+  and Custom Event Properties (CEPs).
+
+  The workflow iterates result.data[] and posts each record's
+  "results" object. The results object uses numeric string keys
+  that correspond to the report header sequence numbers:
+
+    Key  Header name        Description
+    ---  -----------------  ------------------------------------------
+    "1"  CreationTimeUTC    Date and time the activity was created
+    "2"  PerformedBy        The user who performed the activity
+    "3"  Context            The service context of the activity
+    "4"  ActionTaken        The action taken by the activity
+    "5"  ContextDescription The detailed context description
+    "6"  Activity           The detailed context of the activity
+    "7"  AuditTrailID       The audit trail ID of the activity
+
+  Each posted event root is therefore the results object:
+    { "1": "2026-08-01 22:12:55.751747", "2": "Erwin Friethoff", ... }
+
+  Schema
+  ------
+  Namespace : event_parsing/device_extension
+  Pattern types:
+    JsonKeypath  – extracts a JSON field using /"key" syntax
+    JavaPattern  – Java regex; (.*?) used as catch-all for
+                   event-match-multiple
+
+  device-type-id-override
+  -----------------------
+  4026 = Universal Cloud REST API log source type in QRadar.
+  This binds the extension to events collected by the GEM Activity
+  Log UCC workflow log source.
+
+  Standard QRadar fields mapped
+  ------------------------------
+  EventName     ← "4" (ActionTaken)    e.g. "Run report", "Stop query"
+  UserName      ← "2" (PerformedBy)    the user who performed the action
+  StartTime     ← "1" (CreationTimeUTC) event timestamp
+  DeviceAddress ← source (gem_host)    set by the workflow PostEvent source
+
+  Custom Event Properties (CEPs)
+  --------------------------------
+  CEPs are created via Admin → Custom Event Properties → Add,
+  or by right-clicking an event in Log Activity → Extract Property.
+  The field names used in the json-matcher elements below must
+  match the CEP names exactly once created.
+
+  Property name                       JSON source key
+  ----------------------------------  ---------------
+  GEM Activity CreationTimeUTC        "1"
+  GEM Activity PerformedBy            "2"
+  GEM Activity Context                "3"
+  GEM Activity ActionTaken            "4"
+  GEM Activity ContextDescription     "5"
+  GEM Activity Activity               "6"
+  GEM Activity AuditTrailID           "7"
+  ============================================================
+-->
+<ns2:device-extension xmlns:ns2="event_parsing/device_extension">
+
+    <!-- ── JsonKeypath patterns ───────────────────────────────────────────── -->
+    <!-- Standard QRadar event fields -->
+    <pattern id="ActivityEventName-Pattern"   type="JsonKeypath">/"4"</pattern>
+    <pattern id="ActivityUserName-Pattern"    type="JsonKeypath">/"2"</pattern>
+    <pattern id="ActivityStartTime-Pattern"   type="JsonKeypath">/"1"</pattern>
+
+    <!-- Custom Event Property patterns -->
+    <pattern id="GEM-Activity-CreationTimeUTC-Pattern"      type="JsonKeypath">/"1"</pattern>
+    <pattern id="GEM-Activity-PerformedBy-Pattern"          type="JsonKeypath">/"2"</pattern>
+    <pattern id="GEM-Activity-Context-Pattern"              type="JsonKeypath">/"3"</pattern>
+    <pattern id="GEM-Activity-ActionTaken-Pattern"          type="JsonKeypath">/"4"</pattern>
+    <pattern id="GEM-Activity-ContextDescription-Pattern"   type="JsonKeypath">/"5"</pattern>
+    <pattern id="GEM-Activity-Activity-Pattern"             type="JsonKeypath">/"6"</pattern>
+    <pattern id="GEM-Activity-AuditTrailID-Pattern"         type="JsonKeypath">/"7"</pattern>
+
+    <!-- Catch-all: matches every event so event-match-multiple fires -->
+    <pattern id="AllActivityEvents" type="JavaPattern">(.*?)</pattern>
+
+    <!-- ── Match group ────────────────────────────────────────────────────── -->
+    <!--
+      device-type-id-override="4026" targets the Universal Cloud REST API
+      log source type.  All json-matcher order values are unique within
+      the group.
+    -->
+    <match-group order="1" device-type-id-override="4026">
+
+        <!-- Standard QRadar fields -->
+        <json-matcher field="EventName"  pattern-id="ActivityEventName-Pattern"  enable-substitutions="true" order="1"/>
+        <json-matcher field="UserName"   pattern-id="ActivityUserName-Pattern"   enable-substitutions="true" order="2"/>
+        <json-matcher field="StartTime"  pattern-id="ActivityStartTime-Pattern"  enable-substitutions="true" order="3"/>
+
+        <!-- Custom Event Properties -->
+        <json-matcher field="GEM Activity CreationTimeUTC"    pattern-id="GEM-Activity-CreationTimeUTC-Pattern"    enable-substitutions="true" order="4"/>
+        <json-matcher field="GEM Activity PerformedBy"        pattern-id="GEM-Activity-PerformedBy-Pattern"        enable-substitutions="true" order="5"/>
+        <json-matcher field="GEM Activity Context"            pattern-id="GEM-Activity-Context-Pattern"            enable-substitutions="true" order="6"/>
+        <json-matcher field="GEM Activity ActionTaken"        pattern-id="GEM-Activity-ActionTaken-Pattern"        enable-substitutions="true" order="7"/>
+        <json-matcher field="GEM Activity ContextDescription" pattern-id="GEM-Activity-ContextDescription-Pattern" enable-substitutions="true" order="8"/>
+        <json-matcher field="GEM Activity Activity"           pattern-id="GEM-Activity-Activity-Pattern"           enable-substitutions="true" order="9"/>
+        <json-matcher field="GEM Activity AuditTrailID"       pattern-id="GEM-Activity-AuditTrailID-Pattern"       enable-substitutions="true" order="10"/>
+
+        <!-- Catch-all: ensures every event is accepted and QID lookup runs -->
+        <event-match-multiple pattern-id="AllActivityEvents" send-identity="UseDSMResults" force-qidmap-lookup-on-fixup="true"/>
+
+    </match-group>
+
+</ns2:device-extension>

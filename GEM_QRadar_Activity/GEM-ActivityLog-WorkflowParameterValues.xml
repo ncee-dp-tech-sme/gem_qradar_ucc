@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WorkflowParameterValues xmlns="http://qradar.ibm.com/UniversalCloudRESTAPI/WorkflowParameterValues/V2">
+    <!-- Hostname of the GEM instance only — no scheme, no trailing slash, e.g. eu.guardium.security.ibm.com -->
+    <Value name="gem_host"            value="" />
+    <!-- GEM API key issued by your Guardium Exposure Manager instance -->
+    <Value name="api_key"             value="" />
+    <!-- GEM API secret paired with the API key above -->
+    <Value name="api_secret"          value="" />
+    <!-- Activity log report ID — predefined report; default value is 000000000000000000002001 -->
+    <Value name="report_id"           value="000000000000000000002001" />
+    <!-- Number of records per page sent to the API; 500 is the recommended default -->
+    <Value name="fetch_size"          value="500" />
+    <!-- Must match the log source recurrence schedule in QRadar (in minutes); default: 10 -->
+    <Value name="recurrence_minutes"  value="10" />
+</WorkflowParameterValues>

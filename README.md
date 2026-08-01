@@ -1,14 +1,23 @@
-# GEM QRadar Universal Cloud Connector
+# GEM QRadar Universal Cloud Connectors
 
-A QRadar **Universal Cloud REST API** connector that retrieves open issues and their full details from **IBM Guardium Exposure Manager (GEM)** and forwards them to QRadar as individual log events.
+A collection of QRadar **Universal Cloud REST API** connectors for **IBM Guardium Exposure Manager (GEM)**.
 
-> **Current version: 1.2** — see [Change log](#change-log) for details.
+| Connector | Folder | Description |
+|---|---|---|
+| Open Issues + Details | [`GEM_QRadar_UCC/`](GEM_QRadar_UCC/) | Retrieves open issues and their full details on a daily schedule |
+| Activity Log | [`GEM_QRadar_Activity/`](GEM_QRadar_Activity/) | Retrieves activity log entries on a rolling 10-minute schedule |
 
 ---
 
-## Overview
+---
 
-The connector runs on a configurable schedule (minimum once per day) and performs the following actions for each execution:
+## Connector 1 — Open Issues + Details
+
+> **Current version: 1.2** — see [Change log](#change-log) for details.
+
+### Overview
+
+Runs on a configurable schedule (minimum once per day) and performs the following actions for each execution:
 
 1. Computes a 24-hour window covering the **previous UTC calendar day** at runtime.
 2. Queries `GET /api/v1/issues` with pagination (20 issues per page) to retrieve all open issues detected during that window.
@@ -21,19 +30,29 @@ The connector runs on a configurable schedule (minimum once per day) and perform
 
 ```
 GEM_QRADAR_UCC/
-├── GEM_QRadar_UCC/
-│   ├── GEM-Workflow.xml                  # Main workflow definition
-│   ├── GEM-WorkflowParameterValues.xml   # Parameter values template
-│   └── GEM-LogSourceExtension.xml        # QRadar Log Source Extension (LSX)
+├── GEM_QRadar_UCC/                               # Connector 1 — Open Issues + Details
+│   ├── GEM-Workflow.xml                          # Workflow definition
+│   ├── GEM-WorkflowParameterValues.xml           # Parameter values template
+│   └── GEM-LogSourceExtension.xml                # QRadar Log Source Extension (LSX)
+├── GEM_QRadar_Activity/                          # Connector 2 — Activity Log
+│   ├── GEM-ActivityLog-Workflow.xml              # Workflow definition
+│   ├── GEM-ActivityLog-WorkflowParameterValues.xml  # Parameter values template
+│   ├── GEM-ActivityLog-LogSourceExtension.xml    # QRadar Log Source Extension (LSX)
+│   ├── README.md                                 # Activity Log connector documentation
+│   └── examples/
+│       ├── example_curl.txt                      # Reference curl command
+│       └── activity_result.json                  # Sample API response
 ├── examples/
-│   ├── issue.json                        # Sample GEM API issues-list response
-│   └── issue_detail.json                 # Sample GEM API issue-detail response
+│   ├── issue.json                                # Sample GEM API issues-list response
+│   └── issue_detail.json                         # Sample GEM API issue-detail response
 ├── workflows/
-│   ├── Workflow-v2.xsd                   # QRadar workflow XML schema
-│   └── WorkflowParameterValues-v2.xsd    # QRadar parameter values XML schema
-├── prerequisites.txt                     # API endpoint reference notes
-└── README.md                             # This file
+│   ├── Workflow-v2.xsd                           # QRadar workflow XML schema
+│   └── WorkflowParameterValues-v2.xsd            # QRadar parameter values XML schema
+├── prerequisites.txt                             # API endpoint reference notes
+└── README.md                                     # This file
 ```
+
+---
 
 ---
 
@@ -49,7 +68,7 @@ GEM_QRADAR_UCC/
 
 ## Parameters
 
-These values are configured in [`GEM-WorkflowParameterValues.xml`](GEM_QRadar_UCC/GEM-WorkflowParameterValues.xml) before deployment, or entered directly in the QRadar log source wizard.
+These values are configured in [`GEM-WorkflowParameterValues.xml`](GEM_QRadar_UCC/GEM-WorkflowParameterValues.xml) before deployment, or entered directly in the QRadar log source wizard. For the Activity Log connector parameters, see [`GEM_QRadar_Activity/README.md`](GEM_QRadar_Activity/README.md).
 
 | Parameter | Label | Required | Secret | Description |
 |---|---|---|---|---|
@@ -261,7 +280,16 @@ Both XML files conform to the QRadar Universal Cloud REST API V2 schemas located
 
 ## Change log
 
+### Open Issues + Details connector
+
 | Version | Date | Description |
 |---|---|---|
 | 1.1 | 2026-08-01 | Initial release — paginated issue list retrieval + per-issue detail fetch |
 | 1.2 | 2026-08-01 | **Bug fix:** `date_filter` query parameter was manually percent-encoded, causing the UCC framework to double-encode it (`%7B` → `%257B`), which produced a malformed filter and an HTTP 500 from the GEM API. Fixed by using plain XML-escaped JSON — the UCC framework now handles the single-pass URL encoding correctly. |
+
+### Activity Log connector
+
+| Version | Date | Description |
+|---|---|---|
+| 1.0 | 2026-08-01 | Initial release — paginated activity log retrieval with rolling 10-minute date window |
+| 1.1 | 2026-08-01 | **Bug fix:** `gem_host` changed to hostname-only (no `https://` scheme). Resolves `Client Protocol Exception: null` caused by passing a full URL to DNS/TCP/SSL pre-flight test elements. |
