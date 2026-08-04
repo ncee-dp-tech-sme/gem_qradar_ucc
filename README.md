@@ -6,9 +6,9 @@ A collection of QRadar **Universal Cloud REST API** connectors for **IBM Guardiu
 
 | Connector | Folder | Description |
 |---|---|---|
-| Open Issues + Details | [`GEM_QRadar_UCC/`](GEM_QRadar_UCC/) | Retrieves open issues and their full details on a daily schedule |
-| Activity Log | [`GEM_QRadar_Activity/`](GEM_QRadar_Activity/) | Retrieves activity log entries on a rolling 10-minute schedule |
-| **Combined — Issues + Activity Log** | [`GEM_QRadar_issue_activity_logs/`](GEM_QRadar_issue_activity_logs/) | Single log source combining both of the above |
+| Open Issues + Details | [`GEM_QRadar_UCC/`](https://github.com/ncee-dp-tech-sme/gem_qradar_ucc/tree/main/GEM_QRadar_UCC/) | Retrieves open issues and their full details on a daily schedule |
+| Activity Log | [`GEM_QRadar_Activity/`](https://github.com/ncee-dp-tech-sme/gem_qradar_ucc/tree/main/GEM_QRadar_Activity/) | Retrieves activity log entries on a rolling 10-minute schedule |
+| **Combined — Issues + Activity Log** | [`GEM_QRadar_issue_activity_logs/`](https://github.com/ncee-dp-tech-sme/gem_qradar_ucc/tree/main/GEM_QRadar_issue_activity_logs/) | Single log source combining both of the above |
 
 ---
 
