@@ -82,7 +82,7 @@ Combines Connector 1 and Connector 2 into a **single log source** — one set of
 - **Section A — Open Issues:** same daily midnight-window logic as Connector 1.
 - **Section B — Activity Log:** same rolling `recurrence_minutes` window logic as Connector 2.
 
-The LSX uses two `match-group` elements (device-type-id `4015`) to parse the two mutually exclusive event shapes. Events are disambiguated structurally: issue events contain `issue_id`; activity log events contain numeric string key `"1"`.
+The LSX uses two `match-group` elements (device-type-id `4015` by default but after creating the logsource, change it to your logsource id) to parse the two mutually exclusive event shapes. Events are disambiguated structurally: issue events contain `issue_id`; activity log events contain numeric string key `"1"`.
 
 **Files:** [`GEM_QRadar_issue_activity_logs/`](GEM_QRadar_issue_activity_logs/) — see [`GEM_QRadar_issue_activity_logs/README.md`](GEM_QRadar_issue_activity_logs/README.md) for full documentation.
 
