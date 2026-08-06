@@ -91,38 +91,38 @@ In QRadar navigate to **Admin → Custom Event Properties → Add** and create a
 
 | CEP Name | Type | Description |
 |----------|------|-------------|
-| GEM Issue ID | Text | Internal numeric issue ID |
-| GEM Sequential ID | Text | Human-readable ID e.g. ISS-0016 |
-| GEM Issue Name | Text | Short issue title |
-| GEM Issue Type | Text | Issue category / type |
-| GEM Issue Executor | Text | User assigned to the issue |
-| GEM Issue Status | Text | Issue status e.g. ISSUE_STATUS_OPEN |
-| GEM Asset Name | Text | Name of the affected asset |
-| GEM Asset ID | Text | Asset identifier |
-| GEM Asset Type | Text | Asset type e.g. database |
-| GEM Affected Resources Count | Text | Number of affected resources |
-| GEM Policy ID | Text | ID of the triggering policy |
-| GEM Policy Name | Text | Name of the triggering policy |
-| GEM Date Detected | Text | ISO-8601 timestamp of detection |
-| GEM Last Modified | Text | ISO-8601 timestamp of last modification |
-| GEM Scope | Text | Scope name |
-| GEM Scope ID | Text | Scope identifier |
-| GEM Rule ID | Text | Rule that triggered the issue |
-| GEM Data Classifications | Text | Data classification tags |
-| GEM Sensitivity Category | Text | Sensitivity tag category |
-| GEM Sensitivity Count | Text | Count for the sensitivity category |
+| GEM Issue ID | AlphaNumeric | Internal numeric issue ID |
+| GEM Sequential ID | AlphaNumeric | Human-readable ID e.g. ISS-0016 |
+| GEM Issue Name | AlphaNumeric | Short issue title |
+| GEM Issue Type | AlphaNumeric | Issue category / type |
+| GEM Issue Executor | AlphaNumeric | User assigned to the issue |
+| GEM Issue Status | AlphaNumeric | Issue status e.g. ISSUE_STATUS_OPEN |
+| GEM Asset Name | AlphaNumeric | Name of the affected asset |
+| GEM Asset ID | AlphaNumeric | Asset identifier |
+| GEM Asset Type | AlphaNumeric | Asset type e.g. database |
+| GEM Affected Resources Count | AlphaNumeric | Number of affected resources |
+| GEM Policy ID | AlphaNumeric | ID of the triggering policy |
+| GEM Policy Name | AlphaNumeric | Name of the triggering policy |
+| GEM Date Detected | AlphaNumeric | ISO-8601 timestamp of detection |
+| GEM Last Modified | AlphaNumeric | ISO-8601 timestamp of last modification |
+| GEM Scope | AlphaNumeric | Scope name |
+| GEM Scope ID | AlphaNumeric | Scope identifier |
+| GEM Rule ID | AlphaNumeric | Rule that triggered the issue |
+| GEM Data Classifications | AlphaNumeric | Data classification tags |
+| GEM Sensitivity Category | AlphaNumeric | Sensitivity tag category |
+| GEM Sensitivity Count | AlphaNumeric | Count for the sensitivity category |
 
 #### Activity Log CEPs
 
 | CEP Name | Type | Description |
 |----------|------|-------------|
-| GEM Activity CreationTimeUTC | Text | Timestamp the activity was created |
-| GEM Activity PerformedBy | Text | User who performed the activity |
-| GEM Activity Context | Text | Service context of the activity |
-| GEM Activity ActionTaken | Text | Action taken |
-| GEM Activity ContextDescription | Text | Detailed context description |
-| GEM Activity Activity | Text | Detailed activity context |
-| GEM Activity AuditTrailID | Text | Audit trail ID |
+| GEM Activity CreationTimeUTC | AlphaNumeric | Timestamp the activity was created |
+| GEM Activity PerformedBy | AlphaNumeric | User who performed the activity |
+| GEM Activity Context | AlphaNumeric | Service context of the activity |
+| GEM Activity ActionTaken | AlphaNumeric | Action taken |
+| GEM Activity ContextDescription | AlphaNumeric | Detailed context description |
+| GEM Activity Activity | AlphaNumeric | Detailed activity context |
+| GEM Activity AuditTrailID | AlphaNumeric | Audit trail ID |
 
 ---
 

@@ -4,7 +4,7 @@
 
 This connector retrieves **Activity Log** entries from the IBM Guardium Exposure Manager (GEM) SaaS API and forwards them as individual events to a QRadar **Universal Cloud REST API** log source.
 
-Each run queries the GEM `POST /api/v3/reports/run` endpoint for the Activity Log report (`000000000000000000002001`), using a rolling time window driven by the recurrence schedule configured on the log source. The window is `[now - recurrence_minutes, now]`, so runs are contiguous with no gaps or overlaps.
+Each run queries `POST /api/v3/reports/run` for the Activity Log report (`000000000000000000002001`), using a rolling time window of `[now − recurrence_minutes, now]`. Runs are contiguous with no gaps or overlaps.
 
 ---
 
@@ -14,9 +14,7 @@ Each run queries the GEM `POST /api/v3/reports/run` endpoint for the Activity Lo
 |------|---------|
 | `GEM-ActivityLog-Workflow.xml` | UCC workflow — authentication, date-window calculation, pagination loop, event posting |
 | `GEM-ActivityLog-WorkflowParameterValues.xml` | Default parameter values to fill in before importing |
-| `GEM-ActivityLog-LogSourceExtension.xml` | Log Source Extension (LSX) — maps JSON numeric keys to QRadar fields and CEPs |
-| `examples/example_curl.txt` | Reference curl command used to design the workflow |
-| `examples/activity_result.json` | Sample API response showing the data structure |
+| `GEM-ActivityLog-LogSourceExtension.xml` | LSX — maps JSON numeric keys to QRadar fields and CEPs |
 
 ---
 
@@ -32,14 +30,14 @@ Each run queries the GEM `POST /api/v3/reports/run` endpoint for the Activity Lo
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `gem_host` | Full base URL of the GEM instance, e.g. `https://eu.guardium.security.ibm.com` | _(required)_ |
+| `gem_host` | Hostname of the GEM instance — **no scheme, no trailing slash** e.g. `eu.guardium.security.ibm.com` | _(required)_ |
 | `api_key` | GEM API key | _(required, secret)_ |
 | `api_secret` | GEM API secret | _(required, secret)_ |
 | `report_id` | Activity Log report ID | `000000000000000000002001` |
 | `fetch_size` | Records returned per page | `500` |
-| `recurrence_minutes` | **Must match** the log source recurrence schedule in QRadar (minutes) | `10` |
+| `recurrence_minutes` | **Must match** the QRadar log source recurrence schedule | `10` |
 
-> ⚠️ `recurrence_minutes` must be kept in sync with the **Recurrence** field on the QRadar log source. The workflow uses this value to compute the `QUERY_FROM_DATE` / `QUERY_TO_DATE` window. If they diverge, records will be missed or duplicated.
+> ⚠️ `recurrence_minutes` must stay in sync with the **Recurrence** field on the QRadar log source. The workflow uses this value to calculate the time window. If they diverge, records will be missed or duplicated.
 
 ---
 
@@ -54,10 +52,10 @@ Each run queries the GEM `POST /api/v3/reports/run` endpoint for the Activity Lo
 ### 2 — Configure Parameter Values
 
 1. Edit `GEM-ActivityLog-WorkflowParameterValues.xml` and fill in:
-   - `gem_host` — your GEM base URL
+   - `gem_host` — your GEM hostname (e.g. `eu.guardium.security.ibm.com`)
    - `api_key` — your GEM API key
    - `api_secret` — your GEM API secret
-2. Upload the filled-in parameter values file as the **Workflow Parameter Values** for the log source.
+2. Upload the filled-in file as the **Workflow Parameter Values** for the log source.
 
 ### 3 — Create the Log Source
 
@@ -76,17 +74,17 @@ Each run queries the GEM `POST /api/v3/reports/run` endpoint for the Activity Lo
 
 ### 5 — Create Custom Event Properties (CEPs)
 
-In QRadar, navigate to **Admin → Custom Event Properties → Add** and create the following properties (or right-click an event in Log Activity → Extract Property):
+In QRadar, navigate to **Admin → Custom Event Properties → Add** and create the following properties, or right-click an event in Log Activity → Extract Property.
 
 | CEP Name | Type | Description |
 |----------|------|-------------|
-| GEM Activity CreationTimeUTC | Text | Timestamp the activity was created |
-| GEM Activity PerformedBy | Text | User who performed the activity |
-| GEM Activity Context | Text | Service context of the activity |
-| GEM Activity ActionTaken | Text | Action taken |
-| GEM Activity ContextDescription | Text | Detailed context description |
-| GEM Activity Activity | Text | Detailed activity context |
-| GEM Activity AuditTrailID | Text | Audit trail ID |
+| GEM Activity CreationTimeUTC | AlphaNumeric | Timestamp the activity was created |
+| GEM Activity PerformedBy | AlphaNumeric | User who performed the activity |
+| GEM Activity Context | AlphaNumeric | Service context of the activity |
+| GEM Activity ActionTaken | AlphaNumeric | Action taken |
+| GEM Activity ContextDescription | AlphaNumeric | Detailed context description |
+| GEM Activity Activity | AlphaNumeric | Detailed activity context |
+| GEM Activity AuditTrailID | AlphaNumeric | Audit trail ID |
 
 ---
 
@@ -97,15 +95,14 @@ QRadar UCC Scheduler
        │
        ▼
 GEM-ActivityLog-Workflow.xml
-  ├─ Compute date window: [now - recurrence_minutes, now]
-  ├─ POST /api/v3/reports/run  (offset=0, fetch_size=500)
-  │      ├─ Process result.data[] → PostEvent per record
-  │      └─ If count == fetch_size → advance offset, repeat
-  └─ Log completion
-       │
-       ▼
-QRadar Log Activity
-  └─ GEM-ActivityLog-LogSourceExtension.xml maps fields
+  ├─ Compute rolling window: [now − recurrence_minutes, now]
+  ├─ POST /api/v3/reports/run  (paginated, offset steps by fetch_size)
+  │      └─ For each record → PostEvent  results object  ──► LSX
+  └─ Loop until partial page
+         │
+         ▼
+  QRadar Log Activity
+    └─ GEM-ActivityLog-LogSourceExtension.xml maps fields → CEPs
 ```
 
 ---
