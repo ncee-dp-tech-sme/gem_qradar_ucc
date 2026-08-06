@@ -151,3 +151,5 @@ Workflow XML files conform to the QRadar Universal Cloud REST API V2 schemas in 
 - If you have any questions, please reach out to me on LinkedIn. I’m happy to help.
 - 100% free and open source. No warranty. 
 - GitHub Issues: Report bugs or request features
+
+<img src="https://qradar-ucc-gem.goatcounter.com/count?p=/README" alt="" width="0" height="0" style="display:none" />
