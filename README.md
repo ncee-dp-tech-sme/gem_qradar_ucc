@@ -1,6 +1,6 @@
-# GEM QRadar Universal Cloud Connectors
+# Guardium Exposure Manager -  QRadar Universal Cloud Connectors
 
-https://github.com/ncee-dp-tech-sme/gem_qradar_ucc
+[`Github repository`](https://github.com/ncee-dp-tech-sme/gem_qradar_ucc)
 
 A collection of QRadar **Universal Cloud REST API** connectors for **IBM Guardium Exposure Manager (GEM)**.
 
