@@ -153,4 +153,4 @@ Workflow XML files conform to the QRadar Universal Cloud REST API V2 schemas in 
 - GitHub Issues: Report bugs or request features
 
 
-<img src="https://qradar-ucc-gem.goatcounter.com/count?p=/gem_qradar_ucc">
+<script data-goatcounter="https://qradar-ucc-gem.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
