@@ -144,3 +144,10 @@ Workflow XML files conform to the QRadar Universal Cloud REST API V2 schemas in 
 | Version | Date | Description |
 |---|---|---|
 | 1.0 | 2026-08-02 | Initial release — combined workflow and LSX for Issues + Activity Log under a single QRadar log source. LSX uses device-type-id 4015 (Guardium Exposure Manager Issues and Activities). |
+
+## Disclaimer
+- Created by Erwin Friethoff, Security Architect at IBM. 
+- This is 100% free and open source and not in any way endorsed or supported by IBM. All done on personal title. 
+- If you have any questions, please reach out to me on LinkedIn. I’m happy to help.
+- 100% free and open source. No warranty. 
+- GitHub Issues: Report bugs or request features
